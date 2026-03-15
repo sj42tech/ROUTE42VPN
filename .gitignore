@@ -1,0 +1,17 @@
+.DS_Store
+.idea/
+.vscode/
+.cxx/
+*.iml
+*.log
+*.hprof
+*.jks
+*.keystore
+.gradle/
+/app/build/
+/build/
+/local.properties
+/stderr.log
+/captures/
+/*.apk
+/*.png
