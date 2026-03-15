@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedCard
@@ -18,14 +17,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.sj42tech.route42.config.SingBoxConfigGenerator
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.RoutingMode
@@ -34,6 +30,7 @@ import io.github.sj42tech.route42.tunnel.TunnelRuntime
 import io.github.sj42tech.route42.tunnel.TunnelStatus
 import io.github.sj42tech.route42.tunnel.TunnelServiceController
 import io.github.sj42tech.route42.ui.rememberTunnelConnectAction
+import io.github.sj42tech.route42.ui.endpointConnectionSummary
 import io.github.sj42tech.route42.ui.components.OptionSelector
 import io.github.sj42tech.route42.ui.components.TunnelStatusCard
 
@@ -46,7 +43,6 @@ internal fun ProfileDetailScreen(
     onDnsSelected: (DnsMode) -> Unit,
     onOpenRoutes: () -> Unit,
 ) {
-    val configPreview = remember(profile) { SingBoxConfigGenerator.generate(profile) }
     val tunnelState = TunnelRuntime.state.collectAsStateWithLifecycle().value
     val context = LocalContext.current
     val requestConnect = rememberTunnelConnectAction()
@@ -88,15 +84,18 @@ internal fun ProfileDetailScreen(
                 OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Подключение",
+                            text = "Connection",
                             style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                         )
                         Spacer(modifier = Modifier.height(12.dp))
-                        Text(text = "Server: ${profile.endpoint.server}:${profile.endpoint.serverPort}")
-                        Text(text = "UUID: ${profile.endpoint.uuid}")
-                        profile.endpoint.serverName?.let { Text(text = "SNI: $it") }
-                        profile.endpoint.publicKey?.let { Text(text = "Reality key: $it") }
+                        Text(text = "Profile name: ${profile.name}")
+                        Text(text = "Connection type: ${endpointConnectionSummary(profile.endpoint)}")
+                        profile.endpoint.flow?.let { Text(text = "Flow: $it") }
+                        Text(
+                            text = "Sensitive endpoint details are hidden by default for privacy.",
+                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                        )
                         Spacer(modifier = Modifier.height(12.dp))
                         Button(
                             onClick = ::toggleConnection,
@@ -104,8 +103,8 @@ internal fun ProfileDetailScreen(
                         ) {
                             Text(
                                 when {
-                                    tunnelState.status == TunnelStatus.STARTING && isSameProfile -> "Подключение..."
-                                    tunnelState.status == TunnelStatus.STOPPING && isSameProfile -> "Остановка..."
+                                    tunnelState.status == TunnelStatus.STARTING && isSameProfile -> "Connecting..."
+                                    tunnelState.status == TunnelStatus.STOPPING && isSameProfile -> "Stopping..."
                                     isRunningForProfile -> "Disconnect"
                                     else -> "Connect"
                                 },
@@ -115,7 +114,7 @@ internal fun ProfileDetailScreen(
                         TunnelStatusCard(tunnelState = tunnelState)
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Маршрутизация",
+                            text = "Routing",
                             style = androidx.compose.material3.MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -140,7 +139,7 @@ internal fun ProfileDetailScreen(
                             onClick = onOpenRoutes,
                             modifier = Modifier.fillMaxWidth(),
                         ) {
-                            Text("Редактировать маршруты (${profile.routing.rules.size})")
+                            Text("Edit Routes (${profile.routing.rules.size})")
                         }
                     }
                 }
@@ -149,37 +148,24 @@ internal fun ProfileDetailScreen(
                 OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Исходная ссылка",
+                            text = "Import Privacy",
                             style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        SelectionContainer {
-                            Text(
-                                text = profile.importedShareLink?.raw ?: "No source link",
-                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                                fontFamily = FontFamily.Monospace,
-                            )
-                        }
-                    }
-                }
-            }
-            item {
-                OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Превью sing-box config",
-                            style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
+                            text = "Original share links and generated runtime config are not shown or stored after import.",
+                            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        SelectionContainer {
-                            Text(
-                                text = configPreview,
-                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                                fontFamily = FontFamily.Monospace,
-                            )
-                        }
+                        Text(
+                            text = "Preserved endpoint extras: ${profile.importedShareLink?.extraQueryParameters?.size ?: 0}",
+                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                        )
+                        Text(
+                            text = "Preserved custom extras: ${profile.importedShareLink?.preservedCustomParameters?.size ?: 0}",
+                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                        )
                     }
                 }
             }

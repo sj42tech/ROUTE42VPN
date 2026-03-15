@@ -80,13 +80,13 @@ internal fun RuleEditorCard(
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Value") },
                 supportingText = {
-                    Text("Например: example.com, internal или 192.168.0.0/16")
+                    Text("For example: example.com, internal, or 192.168.0.0/16")
                 },
                 singleLine = true,
             )
             Spacer(modifier = Modifier.height(8.dp))
             TextButton(onClick = onDelete) {
-                Text("Удалить")
+                Text("Delete")
             }
         }
     }

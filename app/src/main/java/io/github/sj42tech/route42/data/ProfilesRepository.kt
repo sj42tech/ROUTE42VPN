@@ -3,16 +3,22 @@ package io.github.sj42tech.route42.data
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.ProfilesSnapshot
 import io.github.sj42tech.route42.model.RoutingMode
 import io.github.sj42tech.route42.model.RoutingRule
+import io.github.sj42tech.route42.model.ThemeMode
 import io.github.sj42tech.route42.model.defaultDnsMode
 
 private val Context.profilesDataStore: DataStore<ProfilesSnapshot> by dataStore(
     fileName = "profiles.json",
     serializer = ProfilesSnapshotSerializer,
+    corruptionHandler = ReplaceFileCorruptionHandler {
+        ProfilesRecoveryNotice.notifyStorageReset()
+        ProfilesSnapshot()
+    },
 )
 
 class ProfilesRepository(private val context: Context) {
@@ -47,6 +53,12 @@ class ProfilesRepository(private val context: Context) {
     suspend fun addRule(profileId: String, rule: RoutingRule) {
         updateProfile(profileId) { profile ->
             profile.copy(routing = profile.routing.copy(rules = profile.routing.rules + rule))
+        }
+    }
+
+    suspend fun setThemeMode(themeMode: ThemeMode) {
+        context.profilesDataStore.updateData { snapshot ->
+            snapshot.copy(themeMode = themeMode)
         }
     }
 

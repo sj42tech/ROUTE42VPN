@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import io.github.sj42tech.route42.data.ProfilesRepository
+import io.github.sj42tech.route42.data.ProfilesRecoveryNotice
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.MatchType
@@ -12,6 +13,7 @@ import io.github.sj42tech.route42.model.ProfilesSnapshot
 import io.github.sj42tech.route42.model.RoutingAction
 import io.github.sj42tech.route42.model.RoutingMode
 import io.github.sj42tech.route42.model.RoutingRule
+import io.github.sj42tech.route42.model.ThemeMode
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -24,8 +26,23 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = ProfilesSnapshot(),
     )
+    val storageRecoveryNotice = ProfilesRecoveryNotice.message.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = null,
+    )
 
     suspend fun upsertProfile(profile: ConnectionProfile): String = repository.upsertProfile(profile)
+
+    fun dismissStorageRecoveryNotice() {
+        ProfilesRecoveryNotice.dismiss()
+    }
+
+    fun setThemeMode(themeMode: ThemeMode) {
+        viewModelScope.launch {
+            repository.setThemeMode(themeMode)
+        }
+    }
 
     fun setRoutingMode(profileId: String, mode: RoutingMode) {
         viewModelScope.launch {
@@ -79,4 +96,3 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 }
-

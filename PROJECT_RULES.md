@@ -1,71 +1,105 @@
 # Project Rules
 
-Эти правила обязательны для всех файлов проекта: исходников, тестов, Markdown-документов, ресурсов, конфигурации и примеров.
+These rules are mandatory for every project file: source code, tests, Markdown docs, assets, config, and examples.
 
-## 1. Идентичность проекта
+## 1. Project Identity
 
-- Публичное имя проекта: `Route42`.
-- Публичное имя репозитория: `ROUTE42VPN`.
-- Технический namespace проекта: `io.github.sj42tech.route42`.
-- Основной префикс custom query-параметров для импортируемых ссылок: `x-route42-*`.
-- Legacy-совместимость с `x-sj42-*` допускается только там, где это нужно для импорта старых ссылок.
-- Публичный брендинг, заголовки, app label и документация используют имя `Route42`, если нет отдельной причины явно говорить о техническом namespace.
-- В проекте запрещены персональные имена, логины, имена машин, приватные IP/домены, UUID, ключи, ссылки на личные серверы и иные идентификаторы реальной среды.
-- В проекте запрещены упоминания о том, кто именно вел разработку, личные контакты и ссылки на переписки.
-- В проекте запрещены упоминания о происхождении черновиков, внешних помощниках и служебной истории подготовки файлов.
+- Public project name: `Route42`.
+- Public repository name: `ROUTE42VPN`.
+- Technical namespace: `io.github.sj42tech.route42`.
+- Primary custom query prefix for imported links: `x-route42-*`.
+- Imported custom routing links must use `x-route42-*` only.
+- Public branding, titles, app labels, and docs use `Route42` unless there is a clear reason to mention the technical namespace.
+- Personal names, usernames, machine names, private IPs or domains, UUIDs, keys, links to personal servers, and any other real-environment identifiers are not allowed in the repo.
+- The project must not mention who worked on the code or private conversations.
+- One explicit public project contact method is allowed in the repo for Route42 support, collaboration, or VPS setup inquiries.
+- Any allowed public contact must be intentional, stable, and documented as an official project contact, not as private personal information.
+- The project must not mention draft origins, external helpers, or internal file preparation history.
 
-## 2. Структура файлов
+## 2. File Structure
 
-- Один файл решает одну основную задачу.
-- Большие UI-экраны разбиваются на отдельные файлы экранов, компонентов и навигации.
-- Большие сервисы разбиваются на основной lifecycle-файл и отдельные helper-файлы для уведомлений, сетевой логики, intent-оберток и утилит.
-- Новые документы лежат либо в корне проекта, либо в `docs/`, если это архитектурная или продуктовая документация.
-- Имена файлов должны быть предсказуемыми и совпадать с их назначением.
+- One file should handle one main job.
+- Large UI screens should be split into separate screen, component, and navigation files.
+- Large services should be split into a main lifecycle file plus helper files for notifications, network logic, intent wrappers, and utilities.
+- New docs should live either in the project root or in `docs/` for architecture or product documentation.
+- File names should be predictable and match their purpose.
 
-## 3. Ограничения на размер и связность
+## 3. Size And Cohesion
 
-- UI-файлы желательно держать в пределах ~300 строк; если экран растет, его нужно дробить.
-- Сервисные и инфраструктурные файлы желательно держать в пределах ~400 строк; повторяющуюся и побочную логику нужно выносить.
-- Функции должны быть короткими и читаемыми; вложенность и ветвление нужно сокращать через небольшие helper-функции.
-- Повторяющиеся строки, списки ключей и магические числа должны быть вынесены в именованные константы.
+- UI files should usually stay around ~300 lines; if a screen keeps growing, split it.
+- Service and infrastructure files should usually stay around ~400 lines; repeated and side logic should be extracted.
+- Functions should stay short and readable; reduce nesting and branching with small helper functions.
+- Repeated strings, key lists, and magic numbers should be moved into named constants.
 
-## 4. Правила для Kotlin и Android-кода
+## 4. Kotlin And Android Code
 
-- Предпочитать неизменяемые модели данных.
-- Состояние UI и туннеля оформлять через явные модели состояния.
-- Побочные эффекты должны быть сосредоточены в понятных местах: `ViewModel`, service-layer, repository-layer.
-- Бизнес-правила, парсинг и генерацию конфигов держать отдельно от UI.
-- Редкие комментарии допустимы только там, где без них сложно понять намерение.
-- Любой новый API должен иметь понятное имя без сокращений, понятных только автору.
+- Prefer immutable data models.
+- Represent UI and tunnel state with explicit state models.
+- Side effects should live in clear places: `ViewModel`, service layer, and repository layer.
+- Keep business rules, parsing, and config generation separate from UI.
+- Use comments only when the intent would otherwise be hard to understand.
+- Every new API should have a clear name without private shorthand.
 
-## 5. Правила для документации
+## 5. Documentation Rules
 
-- Документы описывают архитектуру и публичное поведение, а не личную историю разработки.
-- Все примеры используют обезличенные placeholder-значения или тестовые диапазоны адресов из документации (`203.0.113.0/24`, `2001:db8::/32`, `example.com`).
-- В документации нельзя публиковать реальные ключи, UUID, серверы, SNI, домены и иные рабочие реквизиты.
-- README обязан оставаться короткой входной точкой и ссылаться на обязательные правила проекта.
+- Docs describe architecture and public behavior, not personal development history.
+- All examples use anonymized placeholders or documentation test ranges like `203.0.113.0/24`, `2001:db8::/32`, and `example.com`.
+- Docs must not publish real keys, UUIDs, servers, SNI values, domains, or any other live credentials.
+- The README should stay short and point people to the required project rules.
+- All docs, code comments, and user-facing copy must be written in clear English only.
 
-## 6. Локальные и генерируемые файлы
+## 6. Local And Generated Files
 
-- В проекте не хранятся `build/`, APK, временные логи, дампы, скриншоты отладки и machine-specific файлы.
-- `local.properties` не должен содержаться в проекте.
-- Локальная сборочная среда настраивается вне репозитория через переменные окружения или локальные незакоммиченные файлы.
-- Для таких файлов должен быть настроен `.gitignore`.
+- The repo must not store `build/`, APKs, temp logs, dumps, debug screenshots, or machine-specific files.
+- `local.properties` must not be committed.
+- The local build environment should be configured outside the repo with environment variables or uncommitted local files.
+- `.gitignore` must cover those files.
 
-## 7. Безопасность и приватность
+## 7. Security And Privacy
 
-- Нельзя коммитить реальные секреты или рабочие конфиги.
-- Любой пример профиля должен быть безопасным шаблоном.
-- Если файл содержит реальные данные, их нужно заменить на шаблоны либо удалить файл из проекта.
+- Never commit real secrets or live configs.
+- Every sample profile must be a safe template.
+- If a file contains real data, replace it with placeholders or remove it from the project.
 
-## 8. Тесты
+## 8. Tests
 
-- Парсеры, генераторы конфигов и преобразования состояния должны иметь детерминированные unit-тесты.
-- Тестовые данные должны быть обезличенными и стабильными.
-- Тесты должны проверять поведение, а не совпадение случайных локальных артефактов.
+- Parsers, config generators, and state transformations should have deterministic unit tests.
+- Test data must stay anonymized and stable.
+- Tests should verify behavior, not random local artifacts.
 
-## 9. Обязательное правило изменений
+## 9. Change Rule
 
-- Перед добавлением нового файла нужно понять, в какой слой проекта он относится.
-- Перед укрупнением существующего файла нужно сначала попытаться вынести часть логики в отдельный файл.
-- Любое изменение, нарушающее эти правила, считается незаконченным до приведения проекта в соответствие.
+- Before adding a new file, decide which project layer it belongs to.
+- Before making an existing file larger, first try to extract part of the logic into a separate file.
+- Any change that breaks these rules is not done until the project is brought back into compliance.
+
+## 10. Release Readiness
+
+These checks define the release readiness baseline for Route42.
+
+### Required Green Checks
+
+- `./gradlew testDebugUnitTest assembleDebug assembleRelease assembleAndroidTest connectedDebugAndroidTest` must pass before a public release decision.
+- The instrumentation smoke test in `app/src/androidTest/java/io/github/sj42tech/route42/MainActivitySmokeTest.kt` must pass on the current emulator setup.
+- A signed release build must be verified locally or in CI with `apksigner verify`.
+
+### Required Repository State
+
+- The repository must stay aligned with the current Route42 naming, privacy, and release-safety rules.
+- Root screenshots, temporary PNG files, and local source image imports must stay ignored by `.gitignore` unless they are intentionally added as project assets.
+- Public docs, branding, and release workflow files must stay aligned with the actual product behavior.
+
+### Required Release Infrastructure
+
+- GitHub signing secrets described in `docs/github-release-signing.md` must be configured before publishing a tagged GitHub Release.
+- The GitHub release workflow must build a signed `release` APK, not a debug artifact.
+
+### Residual Risks That Do Not Block A Public Repository
+
+- A clean release candidate can still be pushed publicly even if GitHub release secrets are not configured yet.
+- CI coverage may still have gaps, such as not running emulator instrumentation tests in GitHub Actions, as long as those gaps are explicitly understood and local validation has been completed.
+
+### Release Verdict Rule
+
+- Route42 is ready for the first public commit and push when the required green checks and repository state rules are satisfied.
+- Route42 is ready for the first tagged GitHub Release only when the signing secrets are configured and the signed release APK path is verified end-to-end.

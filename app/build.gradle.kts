@@ -4,6 +4,22 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
+val releaseKeystorePath = providers.environmentVariable("ROUTE42_KEYSTORE_PATH").orNull
+    ?: providers.gradleProperty("ROUTE42_KEYSTORE_PATH").orNull
+val releaseStorePassword = providers.environmentVariable("ROUTE42_KEYSTORE_PASSWORD").orNull
+    ?: providers.gradleProperty("ROUTE42_KEYSTORE_PASSWORD").orNull
+val releaseKeyAlias = providers.environmentVariable("ROUTE42_KEY_ALIAS").orNull
+    ?: providers.gradleProperty("ROUTE42_KEY_ALIAS").orNull
+val releaseKeyPassword = providers.environmentVariable("ROUTE42_KEY_PASSWORD").orNull
+    ?: providers.gradleProperty("ROUTE42_KEY_PASSWORD").orNull
+
+val hasReleaseSigning = listOf(
+    releaseKeystorePath,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all { !it.isNullOrBlank() }
+
 android {
     namespace = "io.github.sj42tech.route42"
     compileSdk = 34
@@ -21,9 +37,27 @@ android {
         }
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("route42Release") {
+                storeFile = file(checkNotNull(releaseKeystorePath))
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = true
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("route42Release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -75,6 +109,8 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 

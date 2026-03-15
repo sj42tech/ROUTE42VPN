@@ -18,16 +18,16 @@ internal object TunnelDiagnostics {
         val target = parseProxyTarget(config) ?: return
 
         runCatching { plainSocketProbe(target.first, target.second) }
-            .onSuccess { log("probe plain tcp ${target.first}:${target.second} ok") }
-            .onFailure { log("probe plain tcp ${target.first}:${target.second} failed: ${it.message}") }
+            .onSuccess { log("probe plain tcp ok") }
+            .onFailure { log("probe plain tcp failed: ${it.message}") }
 
         runCatching { protectedSocketProbe(target.first, target.second, protectSocket) }
-            .onSuccess { log("probe protected tcp ${target.first}:${target.second} ok") }
-            .onFailure { log("probe protected tcp ${target.first}:${target.second} failed: ${it.message}") }
+            .onSuccess { log("probe protected tcp ok") }
+            .onFailure { log("probe protected tcp failed: ${it.message}") }
 
         runCatching { networkBoundSocketProbe(target.first, target.second, requireResolverNetwork) }
-            .onSuccess { log("probe network tcp ${target.first}:${target.second} ok") }
-            .onFailure { log("probe network tcp ${target.first}:${target.second} failed: ${it.message}") }
+            .onSuccess { log("probe network tcp ok") }
+            .onFailure { log("probe network tcp failed: ${it.message}") }
     }
 
     private fun parseProxyTarget(config: String): Pair<String, Int>? = runCatching {

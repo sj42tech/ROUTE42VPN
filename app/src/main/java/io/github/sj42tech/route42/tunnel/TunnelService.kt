@@ -153,12 +153,14 @@ class TunnelService : VpnService(), PlatformInterface, CommandServerHandler {
 
         runCatching {
             Libbox.checkConfig(config)
-            TunnelDiagnostics.logUpstreamReachability(
-                config = config,
-                requireResolverNetwork = resolverNetworkController::requireNetwork,
-                protectSocket = { socket -> protect(socket) },
-                log = ::appendDiagnosticLog,
-            )
+            if (Route42Application.diagnosticsEnabled) {
+                TunnelDiagnostics.logUpstreamReachability(
+                    config = config,
+                    requireResolverNetwork = resolverNetworkController::requireNetwork,
+                    protectSocket = { socket -> protect(socket) },
+                    log = ::appendDiagnosticLog,
+                )
+            }
             val server = commandServer ?: Libbox.newCommandServer(this@TunnelService, this@TunnelService).also {
                 it.start()
                 commandServer = it

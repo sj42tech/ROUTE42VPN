@@ -35,7 +35,7 @@ internal fun RoutingEditorScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Маршруты") },
+                title = { Text("Routes") },
                 navigationIcon = {
                     TextButton(onClick = onBack) {
                         Text("Back")
@@ -55,7 +55,7 @@ internal fun RoutingEditorScreen(
                 OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                     androidx.compose.foundation.layout.Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Быстрое добавление",
+                            text = "Quick Add",
                             style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -80,7 +80,7 @@ internal fun RoutingEditorScreen(
                 item {
                     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = "Пока нет пользовательских маршрутов. Добавь сайты или CIDR и они сразу попадут в профиль.",
+                            text = "No custom routes yet. Add domains or CIDR entries and they will be saved to this profile right away.",
                             modifier = Modifier.padding(16.dp),
                         )
                     }

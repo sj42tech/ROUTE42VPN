@@ -78,7 +78,6 @@ object VlessLinkParser {
             endpoint = endpoint,
             routing = parseRouting(queryParameters),
             importedShareLink = ImportedShareLink(
-                raw = normalizedLink,
                 extraQueryParameters = endpointExtras,
                 preservedCustomParameters = preservedCustomParameters,
             ),

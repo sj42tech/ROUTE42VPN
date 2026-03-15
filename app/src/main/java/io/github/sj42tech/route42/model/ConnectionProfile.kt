@@ -15,7 +15,6 @@ data class ConnectionProfile(
 
 @Serializable
 data class ImportedShareLink(
-    val raw: String,
     val extraQueryParameters: Map<String, List<String>> = emptyMap(),
     val preservedCustomParameters: Map<String, List<String>> = emptyMap(),
 )

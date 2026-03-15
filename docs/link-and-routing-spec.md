@@ -12,7 +12,7 @@ The import link is only the transport envelope. After parsing, the app stores a 
 - routing mode;
 - DNS mode;
 - editable routing rules;
-- preserved unknown query parameters for safe round-trip export.
+- preserved unknown query parameters as saved metadata.
 
 ## Standard VLESS Fields
 
@@ -59,7 +59,7 @@ Normalized endpoint model:
 
 ## Preserved Unknown Parameters
 
-Unknown parameters are kept in the saved profile so the original share link can be re-exported without losing metadata.
+Unknown parameters are kept in the saved profile as normalized metadata.
 
 Example:
 
@@ -74,8 +74,6 @@ Example:
 ## Custom Routing Parameters
 
 Custom keys use the `x-route42-` prefix.
-
-Legacy `x-sj42-*` keys are still accepted for backward compatibility when importing older links.
 
 ### Mode
 
@@ -160,7 +158,6 @@ RoutingRule
 - enabled
 
 ImportedShareLink
-- raw
 - extraQueryParameters
 - preservedCustomParameters
 ```
@@ -169,7 +166,6 @@ ImportedShareLink
 
 1. Standard VLESS fields map to `EndpointConfig`.
 2. `x-route42-*` routing keys map to `RoutingProfile`.
-3. Legacy `x-sj42-*` routing keys are also accepted during import.
-4. Unknown non-routing keys are preserved for export.
-5. Missing routing parameters default to `RoutingMode.PROXY`.
-6. After saving, the UI edits the normalized profile model, not the raw URL.
+3. Unknown non-routing keys are preserved as saved metadata.
+4. Missing routing parameters default to `RoutingMode.PROXY`.
+5. After saving, the UI edits the normalized profile model, not the raw URL.

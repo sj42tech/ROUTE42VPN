@@ -19,7 +19,7 @@ This guide describes:
 
 After saving:
 
-- the raw share link is no longer the main editable object;
+- the raw share link is not stored as part of the saved profile;
 - the app converts the link into an internal profile model;
 - transport settings stay in the connection profile;
 - routing mode, DNS mode, and imported rules become editable on the profile screens;
@@ -70,8 +70,6 @@ All new routing parameters use this prefix:
 ```text
 x-route42-
 ```
-
-Legacy links with `x-sj42-*` are still accepted during import.
 
 Example:
 
@@ -292,7 +290,7 @@ The parser currently recognizes these names as reserved:
 
 In the current build they are not applied to routing behavior and should not be used as active configuration knobs.
 
-Unknown custom keys with either `x-route42-*` or legacy `x-sj42-*` prefixes are preserved for round-trip safety, but they do not affect routing unless the app adds explicit support for them later.
+Unknown `x-route42-*` custom keys are preserved as custom metadata, but they do not affect routing unless the app adds explicit support for them later.
 
 ## Recommended Example: Personal Split Routing
 

@@ -1,36 +1,98 @@
 # Route42
 
-Android-клиент на Kotlin/Compose для подключения к `sing-box`-совместимым VPN и прокси-профилям с управляемой маршрутизацией.
+Route42 is an Android VLESS client for self-hosted VPN and sing-box-compatible profiles.
 
-Публичное имя приложения: `Route42`.
+It lets you import `vless://` links, connect through Android `VpnService`, and manage custom routing rules for direct, proxy, and split traffic. Route42 is designed for users who run their own VPS or already have sing-box-compatible access profiles and want a simple Android client with configurable routing behavior.
 
-Имя репозитория: `ROUTE42VPN`.
+## Contact And VPS Setup
+
+For project questions, collaboration, or custom VPS setup help, contact `sj42tech@proton.me`.
+
+Route42 is an independent client project and is not an official sing-box client.
+
+## License
+
+Route42 is distributed under `GPL-3.0-or-later`. Third-party components remain under their own licenses.
+
+See [NOTICE.md](NOTICE.md), [LICENSE](LICENSE), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the current licensing and third-party component records.
+
+## Before You Start
+
+Route42 is a client app only. It does not include a VPN server, a VPS, or bundled access.
+
+To use this app, you need one of the following:
+
+- your own VPS with `Xray-core` configured for `VLESS` or another compatible setup;
+- a `vless://` share URL from a third-party provider or community that gives you access to its VPS service.
+
+Public or free share URLs can work, but they are often unstable, short-lived, or unsafe. Use trusted sources only. Route42 does not verify or endorse third-party public services.
+
+Useful starting points:
+
+- [Project X / Xray-core](https://xtls.github.io/en/)
+- [Xray Quick Start](https://xtls.github.io/en/document/)
+- [Xray Download and Install](https://xtls.github.io/en/document/install.html)
+- [Xray Configuration Guide](https://xtls.github.io/en/config/)
+- [VLESS Protocol](https://xtls.github.io/en/development/protocols/vless.html)
+- [XTLS/Xray-install](https://github.com/XTLS/Xray-install)
+- [XTLS/Xray-examples](https://github.com/XTLS/Xray-examples)
+- [sing-box Documentation](https://sing-box.sagernet.org/configuration/)
+
+Public app name: `Route42`.
+
+Repository name: `ROUTE42VPN`.
 
 GitHub: [sj42tech/ROUTE42VPN](https://github.com/sj42tech/ROUTE42VPN)
 
-## Обязательные правила разработки
+## Required Project Rules
 
-Все изменения в коде, документах, ресурсах и конфигурации проекта **обязаны** соответствовать правилам из [PROJECT_RULES.md](PROJECT_RULES.md).
+All changes in code, docs, assets, and project config must follow [PROJECT_RULES.md](PROJECT_RULES.md).
 
-Это требование распространяется на:
+This applies to:
 
-- структуру директорий и файлов;
-- именование пакетов, классов и документов;
-- примеры в документации;
-- локальные и генерируемые файлы;
-- правила обезличивания и запрет на персональные данные в проекте.
+- directory and file structure;
+- package, class, and document naming;
+- documentation examples;
+- local and generated files;
+- anonymization rules and the ban on personal data in the repo.
 
-## Кратко о проекте
+## Project At A Glance
 
-- приложение импортирует стандартные `vless://` ссылки;
-- клиент поддерживает собственные routing-параметры поверх импортируемого профиля;
-- конфиг `sing-box` генерируется из внутренних моделей, а не редактируется вручную;
-- маршрутизация поддерживает режимы `direct`, `proxy` и `rule`;
-- VPN поднимается через Android `VpnService`.
+- imports standard `vless://` links;
+- supports Route42 routing parameters on top of imported profiles;
+- generates `sing-box` config from internal models instead of editing raw config by hand;
+- supports `direct`, `proxy`, and `rule` routing modes;
+- runs the VPN tunnel through Android `VpnService`.
 
-## Основные документы
+## Main Docs
 
 - [PROJECT_RULES.md](PROJECT_RULES.md)
+- [NOTICE.md](NOTICE.md)
+- [LICENSE](LICENSE)
+- [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+- [docs/github-repository-metadata.md](docs/github-repository-metadata.md)
+- [docs/android-vless-client-overview.md](docs/android-vless-client-overview.md)
+- [docs/github-release-signing.md](docs/github-release-signing.md)
+- [docs/use-your-own-vps-on-android.md](docs/use-your-own-vps-on-android.md)
+- [docs/import-vless-links-on-android.md](docs/import-vless-links-on-android.md)
+- [docs/sing-box-routing-on-android.md](docs/sing-box-routing-on-android.md)
+- [docs/self-hosted-vpn-android-guide.md](docs/self-hosted-vpn-android-guide.md)
 - [docs/import-link-routing-guide.md](docs/import-link-routing-guide.md)
 - [docs/link-and-routing-spec.md](docs/link-and-routing-spec.md)
 - [docs/mvp-config.md](docs/mvp-config.md)
+- [DONATE.md](DONATE.md)
+
+## GitHub Releases
+
+This repo includes a signed release APK workflow for GitHub Actions.
+
+- Configure the required GitHub secrets described in [docs/github-release-signing.md](docs/github-release-signing.md).
+- A local helper script is available at `secrets/print-github-secrets.sh` to print the four GitHub secret values from ignored local files.
+- Run the `Release APK` workflow manually to build a signed release artifact.
+- Push a tag like `v0.1.0` to build a signed APK and attach it to the matching GitHub Release.
+
+## Support Route42
+
+If Route42 is useful to you, you can support development with a voluntary donation.
+
+Details and the current wallet address are in [DONATE.md](DONATE.md).

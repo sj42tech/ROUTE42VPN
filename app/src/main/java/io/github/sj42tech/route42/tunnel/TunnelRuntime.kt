@@ -26,9 +26,18 @@ data class TunnelState(
 
 object TunnelRuntime {
     private const val MaxLogLines = 120
+    @Volatile
+    private var diagnosticsEnabled = false
 
     private val mutableState = MutableStateFlow(TunnelState())
     val state = mutableState.asStateFlow()
+
+    fun setDiagnosticsEnabled(enabled: Boolean) {
+        diagnosticsEnabled = enabled
+        if (!enabled) {
+            mutableState.update { it.copy(logs = emptyList()) }
+        }
+    }
 
     fun setStarting(profileId: String, profileName: String) {
         mutableState.update {
@@ -108,18 +117,12 @@ object TunnelRuntime {
                 resolvingPublicIp = false,
             )
         }
-        if (!publicIp.isNullOrBlank()) {
-            appendLog("public ip: $publicIp")
-        }
-        if (!directPublicIp.isNullOrBlank()) {
-            appendLog("direct ip: $directPublicIp")
-        }
-        if (!localNetworkIp.isNullOrBlank()) {
-            appendLog("lan ip: $localNetworkIp")
-        }
     }
 
     fun appendLog(message: String) {
+        if (!diagnosticsEnabled) {
+            return
+        }
         mutableState.update { state ->
             val nextLogs = (state.logs + message.trim()).takeLast(MaxLogLines)
             state.copy(logs = nextLogs)

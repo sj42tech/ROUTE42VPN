@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.parser.VlessLinkParser
+import io.github.sj42tech.route42.ui.endpointConnectionSummary
 import io.github.sj42tech.route42.ui.components.InfoChipRow
 import kotlinx.coroutines.launch
 
@@ -49,7 +50,7 @@ internal fun ImportLinkScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Импорт ссылки") },
+                title = { Text("Import Link") },
                 navigationIcon = {
                     TextButton(onClick = onBack) {
                         Text("Back")
@@ -73,7 +74,7 @@ internal fun ImportLinkScreen(
                     label = { Text("VLESS or custom VLESS link") },
                     minLines = 4,
                     supportingText = {
-                        Text("Поддерживаются обычные vless:// ссылки и параметры маршрутизации Route42.")
+                        Text("Supports regular vless:// links and Route42 routing parameters.")
                     },
                 )
             }
@@ -101,7 +102,7 @@ internal fun ImportLinkScreen(
                         },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text("Сохранить профиль")
+                        Text("Save Profile")
                     }
                 }
             }
@@ -114,21 +115,25 @@ private fun ImportPreviewCard(profile: ConnectionProfile) {
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
         androidx.compose.foundation.layout.Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Предпросмотр",
+                text = "Preview",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
             )
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 12.dp))
             Text(text = "Name: ${profile.name}")
-            Text(text = "Server: ${profile.endpoint.server}:${profile.endpoint.serverPort}")
-            Text(text = "Protocol: ${profile.endpoint.protocol.name}")
+            Text(text = "Connection type: ${endpointConnectionSummary(profile.endpoint)}")
             Text(text = "Mode: ${profile.routing.mode.label()}")
             Text(text = "DNS: ${profile.routing.dnsMode.label()}")
+            Text(
+                text = "Sensitive endpoint details are hidden until the profile is saved.",
+                style = MaterialTheme.typography.bodySmall,
+            )
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 10.dp))
             InfoChipRow(
                 labels = buildList {
+                    add(profile.endpoint.protocol.name)
                     add(profile.endpoint.network.uppercase())
-                    profile.endpoint.security?.let(::add)
+                    profile.endpoint.security?.let { add(it.replaceFirstChar(Char::uppercase)) }
                     profile.endpoint.flow?.let(::add)
                     add("${profile.routing.rules.size} imported routes")
                 },

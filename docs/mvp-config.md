@@ -200,7 +200,7 @@ Mapped outbound:
 
 ## Notes
 
-- `spx` is preserved as opaque metadata for round-trip export.
+- `spx` is preserved as opaque endpoint metadata in the saved profile.
 - The generator emits a local SOCKS inbound so the app can probe the real exit IP through the tunnel.
 - The TUN config excludes the server IP from auto-routing when the endpoint is an IP literal.
 - DNS port `853` loopback noise is suppressed with an explicit reject rule.

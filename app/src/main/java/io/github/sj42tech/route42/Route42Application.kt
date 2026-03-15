@@ -2,9 +2,10 @@ package io.github.sj42tech.route42
 
 import android.app.Application
 import android.app.NotificationManager
-import android.os.Build
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
+import android.os.Build
+import android.content.pm.ApplicationInfo
 import androidx.core.content.getSystemService
 import io.github.sj42tech.route42.tunnel.TunnelRuntime
 import io.nekohasekai.libbox.Libbox
@@ -21,9 +22,13 @@ class Route42Application : Application() {
 
     private fun initializeLibbox() {
         runCatching {
-            val baseDir = filesDir.apply { mkdirs() }
-            val workingDir = (getExternalFilesDir(null) ?: filesDir).apply { mkdirs() }
-            val tempDir = cacheDir.apply { mkdirs() }
+            val isDebuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+            diagnosticsEnabled = isDebuggable
+            TunnelRuntime.setDiagnosticsEnabled(isDebuggable)
+
+            val baseDir = File(filesDir, "libbox/base").apply { mkdirs() }
+            val workingDir = File(filesDir, "libbox/work").apply { mkdirs() }
+            val tempDir = File(cacheDir, "libbox").apply { mkdirs() }
 
             Libbox.setLocale(Locale.getDefault().toLanguageTag().replace("-", "_"))
             Libbox.setup(
@@ -35,11 +40,13 @@ class Route42Application : Application() {
                     // workaround to avoid network stack regressions in Go/libbox.
                     fixAndroidStack = shouldFixAndroidStack()
                     logMaxLines = 1500
-                    debug = (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                    debug = isDebuggable
                 },
             )
-            Libbox.redirectStderr(File(workingDir, "stderr.log").path)
-            TunnelRuntime.appendLog("libbox initialized")
+            if (isDebuggable) {
+                Libbox.redirectStderr(File(workingDir, "stderr.log").path)
+                TunnelRuntime.appendLog("libbox initialized")
+            }
         }.onFailure {
             TunnelRuntime.setError("libbox init failed: ${it.message}")
         }
@@ -47,6 +54,9 @@ class Route42Application : Application() {
 
     companion object {
         lateinit var instance: Route42Application
+            private set
+
+        var diagnosticsEnabled: Boolean = false
             private set
 
         val connectivity: ConnectivityManager

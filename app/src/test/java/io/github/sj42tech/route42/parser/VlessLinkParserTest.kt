@@ -56,22 +56,6 @@ class VlessLinkParserTest {
     }
 
     @Test
-    fun `supports legacy sj42 routing keys`() {
-        val profile = VlessLinkParser.parse(
-            "vless://${TestFixtures.Uuid}@${TestFixtures.Server}:${TestFixtures.Port}?" +
-                "security=reality&sni=${TestFixtures.ServerName}&fp=chrome&pbk=testKey&sid=${TestFixtures.ShortId}&type=tcp&" +
-                "x-sj42-mode=rule&x-sj42-dns=split&" +
-                "x-sj42-direct-domain=portal.example&x-sj42-proxy-domain=tunnel.example#router",
-        )
-
-        assertEquals(RoutingMode.RULE, profile.routing.mode)
-        assertEquals(DnsMode.SPLIT, profile.routing.dnsMode)
-        assertEquals(2, profile.routing.rules.size)
-        assertEquals("portal.example", profile.routing.rules[0].value)
-        assertEquals("tunnel.example", profile.routing.rules[1].value)
-    }
-
-    @Test
     fun `rejects broken uuid`() {
         assertFailsWith<LinkParseException> {
             VlessLinkParser.parse("vless://oops@${TestFixtures.Server}:${TestFixtures.Port}?type=tcp")
