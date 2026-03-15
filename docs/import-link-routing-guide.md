@@ -6,7 +6,7 @@ This guide describes:
 
 - how to import a `vless://` link into `Route42`;
 - which transport parameters are read from the link;
-- which `x-sj42-*` query parameters control routing;
+- which `x-route42-*` query parameters control routing;
 - how imported routing rules behave after the profile is saved.
 
 ## How To Import A Link
@@ -61,31 +61,33 @@ These fields are read from a normal `vless://` link and mapped into the endpoint
 | `alpn` | `alpn` | Comma-separated values are split into a list. |
 | `#fragment` | `name` | Used as the visible profile name. |
 
-Unknown non-`x-sj42-*` query parameters are preserved in the endpoint extras. This is how parameters such as `spx=%2F` survive import.
+Unknown non-`x-route42-*` query parameters are preserved in the endpoint extras. This is how parameters such as `spx=%2F` survive import.
 
 ## Routing Parameter Prefix
 
-All routing parameters use this prefix:
+All new routing parameters use this prefix:
 
 ```text
-x-sj42-
+x-route42-
 ```
+
+Legacy links with `x-sj42-*` are still accepted during import.
 
 Example:
 
 ```text
-x-sj42-mode=rule
+x-route42-mode=rule
 ```
 
 ## Routing Modes
 
-The profile mode is controlled by `x-sj42-mode`.
+The profile mode is controlled by `x-route42-mode`.
 
 Allowed values:
 
-- `x-sj42-mode=direct`
-- `x-sj42-mode=proxy`
-- `x-sj42-mode=rule`
+- `x-route42-mode=direct`
+- `x-route42-mode=proxy`
+- `x-route42-mode=rule`
 
 Behavior:
 
@@ -99,17 +101,17 @@ Important details:
 
 - private IP ranges are always routed direct;
 - `lan`, `local`, and `home.arpa` are always routed direct;
-- `.ru` and `.rf` are routed direct only when `x-sj42-mode=rule`.
+- `.ru` and `.rf` are routed direct only when `x-route42-mode=rule`.
 
 ## DNS Modes
 
-DNS behavior is controlled by `x-sj42-dns`.
+DNS behavior is controlled by `x-route42-dns`.
 
 Allowed values:
 
-- `x-sj42-dns=local`
-- `x-sj42-dns=proxy`
-- `x-sj42-dns=split`
+- `x-route42-dns=local`
+- `x-route42-dns=proxy`
+- `x-route42-dns=split`
 
 Behavior:
 
@@ -119,7 +121,7 @@ Behavior:
 | `proxy` | Final DNS server is proxy DNS over the tunnel. |
 | `split` | DNS rules are used for matching, but unmatched lookups still fall back to proxy DNS. |
 
-Default DNS mode if `x-sj42-dns` is omitted:
+Default DNS mode if `x-route42-dns` is omitted:
 
 | Routing mode | Default DNS mode |
 | --- | --- |
@@ -135,25 +137,25 @@ Each routing rule is imported from one repeated query parameter.
 
 | Parameter | Match type in app | Example |
 | --- | --- | --- |
-| `x-sj42-direct-domain` | `Domain` | `x-sj42-direct-domain=bank.example` |
-| `x-sj42-direct-suffix` | `Suffix` | `x-sj42-direct-suffix=corp.local` |
-| `x-sj42-direct-cidr` | `CIDR` | `x-sj42-direct-cidr=192.168.0.0%2F16` |
+| `x-route42-direct-domain` | `Domain` | `x-route42-direct-domain=bank.example` |
+| `x-route42-direct-suffix` | `Suffix` | `x-route42-direct-suffix=corp.local` |
+| `x-route42-direct-cidr` | `CIDR` | `x-route42-direct-cidr=192.168.0.0%2F16` |
 
 ### Proxy Rules
 
 | Parameter | Match type in app | Example |
 | --- | --- | --- |
-| `x-sj42-proxy-domain` | `Domain` | `x-sj42-proxy-domain=youtube.com` |
-| `x-sj42-proxy-suffix` | `Suffix` | `x-sj42-proxy-suffix=googlevideo.com` |
-| `x-sj42-proxy-cidr` | `CIDR` | `x-sj42-proxy-cidr=198.51.100.0%2F24` |
+| `x-route42-proxy-domain` | `Domain` | `x-route42-proxy-domain=youtube.com` |
+| `x-route42-proxy-suffix` | `Suffix` | `x-route42-proxy-suffix=googlevideo.com` |
+| `x-route42-proxy-cidr` | `CIDR` | `x-route42-proxy-cidr=198.51.100.0%2F24` |
 
 ### Block Rules
 
 | Parameter | Match type in app | Example |
 | --- | --- | --- |
-| `x-sj42-block-domain` | `Domain` | `x-sj42-block-domain=ads.example` |
-| `x-sj42-block-suffix` | `Suffix` | `x-sj42-block-suffix=tracker.example` |
-| `x-sj42-block-cidr` | `CIDR` | `x-sj42-block-cidr=203.0.113.128%2F25` |
+| `x-route42-block-domain` | `Domain` | `x-route42-block-domain=ads.example` |
+| `x-route42-block-suffix` | `Suffix` | `x-route42-block-suffix=tracker.example` |
+| `x-route42-block-cidr` | `CIDR` | `x-route42-block-cidr=203.0.113.128%2F25` |
 
 ## Meaning Of Match Types
 
@@ -181,15 +183,15 @@ Rule parameters can be repeated multiple times.
 Example:
 
 ```text
-...&x-sj42-direct-domain=bank1.example&x-sj42-direct-domain=bank2.example&x-sj42-direct-domain=bank3.example
+...&x-route42-direct-domain=bank1.example&x-route42-direct-domain=bank2.example&x-route42-direct-domain=bank3.example
 ```
 
 This imports three separate direct `Domain` rules.
 
 The following parameters use the last value if repeated:
 
-- `x-sj42-mode`
-- `x-sj42-dns`
+- `x-route42-mode`
+- `x-route42-dns`
 
 ## URL Encoding Rules
 
@@ -205,13 +207,13 @@ Most important cases:
 Recommended:
 
 ```text
-x-sj42-direct-cidr=192.168.0.0%2F16
+x-route42-direct-cidr=192.168.0.0%2F16
 ```
 
 Also usually works:
 
 ```text
-x-sj42-direct-cidr=192.168.0.0/16
+x-route42-direct-cidr=192.168.0.0/16
 ```
 
 ## Import Order And Rule Order
@@ -285,17 +287,17 @@ The app edits the normalized internal profile, not the raw URL text.
 
 The parser currently recognizes these names as reserved:
 
-- `x-sj42-home-ssid`
-- `x-sj42-home-mode`
+- `x-route42-home-ssid`
+- `x-route42-home-mode`
 
 In the current build they are not applied to routing behavior and should not be used as active configuration knobs.
 
-Unknown custom keys with the same prefix are preserved for round-trip safety, but they do not affect routing unless the app adds explicit support for them later.
+Unknown custom keys with either `x-route42-*` or legacy `x-sj42-*` prefixes are preserved for round-trip safety, but they do not affect routing unless the app adds explicit support for them later.
 
 ## Recommended Example: Personal Split Routing
 
 ```text
-vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=cdn.example&fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&spx=%2F&type=tcp&x-sj42-mode=rule&x-sj42-dns=split&x-sj42-direct-domain=gosuslugi.ru&x-sj42-direct-domain=online.sberbank.ru&x-sj42-direct-suffix=nalog.gov.ru&x-sj42-proxy-domain=api.telegram.org&x-sj42-proxy-suffix=googlevideo.com&x-sj42-block-suffix=doubleclick.net#home-split-profile
+vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=cdn.example&fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&spx=%2F&type=tcp&x-route42-mode=rule&x-route42-dns=split&x-route42-direct-domain=gosuslugi.ru&x-route42-direct-domain=online.sberbank.ru&x-route42-direct-suffix=nalog.gov.ru&x-route42-proxy-domain=api.telegram.org&x-route42-proxy-suffix=googlevideo.com&x-route42-block-suffix=doubleclick.net#home-split-profile
 ```
 
 What this does:
@@ -311,7 +313,7 @@ What this does:
 ## Recommended Example: Everything Through Proxy
 
 ```text
-vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=cdn.example&fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&spx=%2F&type=tcp&x-sj42-mode=proxy&x-sj42-dns=proxy#full-proxy
+vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=cdn.example&fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&spx=%2F&type=tcp&x-route42-mode=proxy&x-route42-dns=proxy#full-proxy
 ```
 
 What this does:

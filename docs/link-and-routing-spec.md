@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`Route42` imports standard `vless://` links and optionally accepts extra routing parameters with the `x-sj42-*` prefix.
+`Route42` imports standard `vless://` links and accepts extra routing parameters with the `x-route42-*` prefix.
 
 For the detailed user-facing guide, see [import-link-routing-guide.md](import-link-routing-guide.md).
 
@@ -73,50 +73,52 @@ Example:
 
 ## Custom Routing Parameters
 
-Custom keys always use the `x-sj42-` prefix.
+Custom keys use the `x-route42-` prefix.
+
+Legacy `x-sj42-*` keys are still accepted for backward compatibility when importing older links.
 
 ### Mode
 
-- `x-sj42-mode=direct`
-- `x-sj42-mode=proxy`
-- `x-sj42-mode=rule`
+- `x-route42-mode=direct`
+- `x-route42-mode=proxy`
+- `x-route42-mode=rule`
 
 ### DNS
 
-- `x-sj42-dns=local`
-- `x-sj42-dns=proxy`
-- `x-sj42-dns=split`
+- `x-route42-dns=local`
+- `x-route42-dns=proxy`
+- `x-route42-dns=split`
 
 ### Direct Rules
 
-- `x-sj42-direct-domain=portal.example`
-- `x-sj42-direct-domain=intranet.example`
-- `x-sj42-direct-suffix=internal`
-- `x-sj42-direct-cidr=192.168.0.0/16`
+- `x-route42-direct-domain=portal.example`
+- `x-route42-direct-domain=intranet.example`
+- `x-route42-direct-suffix=internal`
+- `x-route42-direct-cidr=192.168.0.0/16`
 
 ### Proxy Rules
 
-- `x-sj42-proxy-domain=tunnel.example`
-- `x-sj42-proxy-suffix=external`
-- `x-sj42-proxy-cidr=198.51.100.0/24`
+- `x-route42-proxy-domain=tunnel.example`
+- `x-route42-proxy-suffix=external`
+- `x-route42-proxy-cidr=198.51.100.0/24`
 
 ### Block Rules
 
-- `x-sj42-block-domain=ads.example`
-- `x-sj42-block-suffix=tracking.example`
-- `x-sj42-block-cidr=203.0.113.128/25`
+- `x-route42-block-domain=ads.example`
+- `x-route42-block-suffix=tracking.example`
+- `x-route42-block-cidr=203.0.113.128/25`
 
 ### Reserved Keys
 
-- `x-sj42-home-ssid`
-- `x-sj42-home-mode`
+- `x-route42-home-ssid`
+- `x-route42-home-mode`
 
 These names are reserved, but they are not applied to routing behavior in the current build.
 
 ## Example With Routing Parameters
 
 ```text
-vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=cdn.example&fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&type=tcp&x-sj42-mode=rule&x-sj42-dns=split&x-sj42-direct-domain=portal.example&x-sj42-direct-domain=intranet.example&x-sj42-direct-suffix=internal&x-sj42-direct-cidr=192.168.0.0%2F16&x-sj42-proxy-domain=tunnel.example&x-sj42-block-suffix=tracking.example#edge-profile-rules
+vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=cdn.example&fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&type=tcp&x-route42-mode=rule&x-route42-dns=split&x-route42-direct-domain=portal.example&x-route42-direct-domain=intranet.example&x-route42-direct-suffix=internal&x-route42-direct-cidr=192.168.0.0%2F16&x-route42-proxy-domain=tunnel.example&x-route42-block-suffix=tracking.example#edge-profile-rules
 ```
 
 ## Saved Domain Model
@@ -166,7 +168,8 @@ ImportedShareLink
 ## Import Rules
 
 1. Standard VLESS fields map to `EndpointConfig`.
-2. `x-sj42-*` routing keys map to `RoutingProfile`.
-3. Unknown non-routing keys are preserved for export.
-4. Missing routing parameters default to `RoutingMode.PROXY`.
-5. After saving, the UI edits the normalized profile model, not the raw URL.
+2. `x-route42-*` routing keys map to `RoutingProfile`.
+3. Legacy `x-sj42-*` routing keys are also accepted during import.
+4. Unknown non-routing keys are preserved for export.
+5. Missing routing parameters default to `RoutingMode.PROXY`.
+6. After saving, the UI edits the normalized profile model, not the raw URL.

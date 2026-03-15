@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "io.sj42.vpn"
+    namespace = "io.github.sj42tech.route42"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "io.sj42.vpn"
+        applicationId = "io.github.sj42tech.route42"
         minSdk = 29
         targetSdk = 34
         versionCode = 1
