@@ -6,7 +6,8 @@ See also: `docs/vps-audit-2026-03-22.md` for the current local audit of the old 
 
 ## Provider Status
 
-- production baseline: `Hostkey 5.39.219.74`
+- live desktop tunnel: `Exoscale 194.182.174.240`
+- rollback baseline: `Hostkey 5.39.219.74`
 - failed experimental provider: `Vultr 108.61.171.121`
 - primary next research track: `Exoscale`
 - secondary paused research track: `uHost`
@@ -24,11 +25,16 @@ See also: `docs/vps-audit-2026-03-22.md` for the current local audit of the old 
 
 ## Current Position
 
-- keep `5.39.219.74` as the only active production server
+- keep `194.182.174.240` as the current live desktop tunnel
+- keep `5.39.219.74` as the rollback and comparison baseline
 - do not switch daily traffic to `108.61.171.121`
 - keep the Vultr scripts and configs as lab material only
-- start the next migration attempt with `Exoscale`
 - keep `uHost` as a paused fallback idea only
+- keep the local desktop split-routing policy in place:
+  private and special-use IP ranges go `direct`
+  `localhost`, `.local`, and `.home.arpa` go `direct`
+  conservative RU-oriented TLDs `.ru`, `.su`, `.рф`, `.дети`, `.москва`, and `.рус` go `direct`
+  all other destinations stay on the Exoscale proxy path
 
 ## Recommended First Try
 
@@ -149,6 +155,23 @@ Safety guards:
 - live cutover is only allowed if `config.json` still points to baseline `5.39.219.74`
 - the script confirms the current live exit IP before switching
 - if post-restart checks fail, it calls `rollback-to-baseline.sh`
+
+## Current Local Routing Split
+
+The local desktop client configs currently share the same direct-bypass policy:
+
+- RFC1918 and adjacent local/special ranges go `direct`, including `127.0.0.0/8`, `10.0.0.0/8`, `100.64.0.0/10`, `169.254.0.0/16`, `172.16.0.0/12`, `192.168.0.0/16`, `198.18.0.0/15`, `224.0.0.0/4`, `255.255.255.255/32`, `::1/128`, `fc00::/7`, `fe80::/10`, and `ff00::/8`
+- `localhost`, `.local`, and `.home.arpa` go `direct`
+- conservative RU-oriented TLDs `.ru`, `.su`, `.рф`, `.дети`, `.москва`, and `.рус` go `direct`
+- `geoip:ru` also stays `direct`
+- everything else continues through the active proxy outbound
+
+Verified locally on `2026-03-22` through `access.log`:
+
+- `www.google.com:443` matched `[proxy]`
+- `yandex.ru:443` matched `[direct]`
+- `localhost:18787` matched `[direct]`
+- `192.168.0.107:18787` matched `[direct]`
 
 ## Diagnose Local Proxy
 
