@@ -8,11 +8,15 @@ See also: `docs/vps-audit-2026-03-22.md` for the current local audit of the old 
 
 - production baseline: `Hostkey 5.39.219.74`
 - failed experimental provider: `Vultr 108.61.171.121`
-- next research track: `uHost`
+- primary next research track: `Exoscale`
+- secondary paused research track: `uHost`
 
 ## What is here
 
 - `hetzner-create-server.sh`: creates a small Hetzner Cloud server through the official API
+- `exoscale-create-server.sh`: creates a small Exoscale instance through the official API
+- `diagnose-proxy.sh`: measures exit IP, latency, and download throughput through a local HTTP or SOCKS proxy
+- `switch-to-exoscale.sh`: validates and optionally cuts over `local.xray` to the Exoscale VPS with automatic rollback
 - `vultr-create-server.sh`: creates a small Vultr Cloud Compute instance through the official API
 - `migrate-xray-from-old-vps.sh`: installs Xray on the new host and copies the current config and systemd files from the old host
 - `switch-to-new-vps.sh`: runs a canary against `108.61.171.121` and only performs a live cutover if you opt in explicitly
@@ -23,7 +27,14 @@ See also: `docs/vps-audit-2026-03-22.md` for the current local audit of the old 
 - keep `5.39.219.74` as the only active production server
 - do not switch daily traffic to `108.61.171.121`
 - keep the Vultr scripts and configs as lab material only
-- start any next migration attempt with `uHost` research first
+- start the next migration attempt with `Exoscale`
+- keep `uHost` as a paused fallback idea only
+
+## Recommended First Try
+
+- Provider: Exoscale
+- Zone: `at-vie-1`
+- Fallback zones: `hr-zag-1`, `de-fra-1`
 
 ## Alternate Try
 
@@ -79,6 +90,86 @@ export HCLOUD_SSH_KEY_PATH="$HOME/.ssh/sergei-macbook-vps.pub"
 
 Each create script prints the new IPv4 address when the server is ready.
 
+## Create the new server on Exoscale
+
+```bash
+export EXOSCALE_API_KEY='...'
+export EXOSCALE_API_SECRET='...'
+/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/exoscale-create-server.sh
+```
+
+Useful overrides:
+
+```bash
+export EXOSCALE_ZONE='at-vie-1'
+export EXOSCALE_PREFERRED_SIZES='tiny,small,micro'
+export EXOSCALE_SSH_KEY_PATH="$HOME/.ssh/sergei-macbook-vps.pub"
+export EXOSCALE_DRY_RUN=1
+```
+
+The script:
+
+- validates the target zone
+- accepts asynchronous Exoscale create responses
+- imports the SSH public key into Exoscale if needed
+- ensures ingress rules for `22/tcp` and `443/tcp`
+- picks a small standard instance automatically
+- picks Debian 12 first, with Ubuntu 24.04 as fallback
+- creates the instance and waits for the public IPv4 address
+
+## Switch To Exoscale
+
+The Exoscale client config lives locally in:
+
+```bash
+/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/secrets/PROXY/xray/config.exoscale.json
+```
+
+Run a safe canary only:
+
+```bash
+/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/switch-to-exoscale.sh
+```
+
+That command:
+
+- starts a temporary Xray canary on `19080/19081`
+- verifies that the exit IP is the Exoscale VPS
+- checks HTTP, HTTPS, and SOCKS
+- leaves the live `local.xray` tunnel untouched
+
+To perform the live cutover with automatic rollback back to `5.39.219.74` on failure:
+
+```bash
+ALLOW_LIVE_SWITCH=1 /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/switch-to-exoscale.sh
+```
+
+Safety guards:
+
+- live cutover is only allowed if `config.json` still points to baseline `5.39.219.74`
+- the script confirms the current live exit IP before switching
+- if post-restart checks fail, it calls `rollback-to-baseline.sh`
+
+## Diagnose Local Proxy
+
+Run diagnostics through the live HTTP proxy:
+
+```bash
+/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/diagnose-proxy.sh
+```
+
+Run diagnostics through a different HTTP port:
+
+```bash
+HTTP_PORT=19081 /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/diagnose-proxy.sh
+```
+
+Run diagnostics through SOCKS:
+
+```bash
+MODE=socks SOCKS_PORT=1080 /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/diagnose-proxy.sh
+```
+
 ## About uHost
 
 There is no self-service `uHost` automation script in this repo yet.
@@ -93,13 +184,19 @@ See `docs/uhost-vps-onboarding.md` for the first-step checklist.
 ## Migrate the current Xray setup
 
 ```bash
-/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/migrate-xray-from-old-vps.sh root@NEW_IP
+/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/migrate-xray-from-old-vps.sh debian@NEW_IP
+```
+
+If the new host needs a dedicated SSH identity:
+
+```bash
+NEW_HOST_SSH_KEY=/absolute/path/to/key /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/migrate-xray-from-old-vps.sh debian@NEW_IP
 ```
 
 If your source host alias changes:
 
 ```bash
-/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/migrate-xray-from-old-vps.sh root@NEW_IP old-host-or-ip
+/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/migrate-xray-from-old-vps.sh debian@NEW_IP old-host-or-ip
 ```
 
 ## After migration
@@ -161,6 +258,7 @@ LAUNCHCTL_LABEL=local.xray /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/roll
 
 ## Notes
 
+- The migration now copies the working `xray` binary and `geoip/geosite` files from the old VPS instead of relying on the upstream installer.
 - The migration keeps the current Xray config as-is, including your existing Reality/VLESS settings.
 - Because the server IP changes, the share link still needs to be updated on the client side.
 - If `hel1` still routes badly from your home ISP, try `nbg1` next before changing the whole provider again.

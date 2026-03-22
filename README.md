@@ -75,6 +75,7 @@ This applies to:
 - [docs/github-release-signing.md](docs/github-release-signing.md)
 - [docs/vps-audit-2026-03-22.md](docs/vps-audit-2026-03-22.md)
 - [docs/vultr-zero-cost-exit.md](docs/vultr-zero-cost-exit.md)
+- [docs/exoscale-vps-onboarding.md](docs/exoscale-vps-onboarding.md)
 - [docs/uhost-vps-onboarding.md](docs/uhost-vps-onboarding.md)
 - [docs/use-your-own-vps-on-android.md](docs/use-your-own-vps-on-android.md)
 - [docs/import-vless-links-on-android.md](docs/import-vless-links-on-android.md)
