@@ -4,6 +4,23 @@ This note documents the safest path to stop paying for the non-working Vultr can
 
 Date of record: `2026-03-22`.
 
+## Execution Status
+
+Completed on `2026-03-22`.
+
+Verified result:
+
+- Vultr instance `108.61.171.121` deleted
+- no remaining Vultr `instances`
+- no remaining Vultr `snapshots`
+- no remaining Vultr `blocks`
+- no remaining Vultr `reserved_ips`
+
+Operational conclusion:
+
+- the Vultr experiment is now preserved only in local repo files
+- provider-side compute billing should now be at `$0` unless some unrelated non-queried service exists outside this project
+
 ## Goal
 
 Reach an effective `$0` Vultr state for this experiment:
