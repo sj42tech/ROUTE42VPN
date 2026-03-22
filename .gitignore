@@ -16,8 +16,4 @@
 /*.apk
 /*.png
 /branding/variant-*.png
-/secrets/*.txt
-/secrets/*.jks
-/secrets/*.keystore
-/secrets/*.base64
-/secrets/.env
+/secrets/
