@@ -16,7 +16,6 @@ import io.nekohasekai.libbox.ConnectionOwner
 import io.nekohasekai.libbox.InterfaceUpdateListener
 import io.nekohasekai.libbox.Libbox
 import io.nekohasekai.libbox.LocalDNSTransport
-import io.nekohasekai.libbox.NeighborUpdateListener
 import io.nekohasekai.libbox.NetworkInterfaceIterator
 import io.nekohasekai.libbox.Notification as BoxNotification
 import io.nekohasekai.libbox.OverrideOptions
@@ -54,7 +53,6 @@ class TunnelService : VpnService(), PlatformInterface, CommandServerHandler {
     private var currentProfileId: String? = null
     private var currentProfileName: String? = null
     private var currentConfig: String? = null
-    private var myInterfaceName: String? = null
     private var pendingConnection: PendingConnection? = null
     private val connectRequestMutex = Mutex()
     @Volatile
@@ -210,7 +208,6 @@ class TunnelService : VpnService(), PlatformInterface, CommandServerHandler {
             currentProfileId = null
             currentProfileName = null
             currentConfig = null
-            myInterfaceName = null
             val nextConnection = pendingConnection
             pendingConnection = null
             runCatching {
@@ -367,7 +364,7 @@ class TunnelService : VpnService(), PlatformInterface, CommandServerHandler {
         runCatching { Route42Application.connectivity.unregisterNetworkCallback(callback) }
     }
 
-    override fun getInterfaces(): NetworkInterfaceIterator = collectNetworkInterfaces(myInterfaceName)
+    override fun getInterfaces(): NetworkInterfaceIterator = collectNetworkInterfaces()
 
     override fun underNetworkExtension(): Boolean = false
 
@@ -388,12 +385,6 @@ class TunnelService : VpnService(), PlatformInterface, CommandServerHandler {
             .build()
         Route42Application.notificationManager.notify(notification.typeID, built)
     }
-
-    override fun startNeighborMonitor(listener: NeighborUpdateListener) = Unit
-
-    override fun closeNeighborMonitor(listener: NeighborUpdateListener) = Unit
-
-    override fun registerMyInterface(name: String) { myInterfaceName = name }
 
     companion object {
         private const val TAG = "TunnelService"

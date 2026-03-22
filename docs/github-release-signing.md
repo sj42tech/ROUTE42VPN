@@ -1,10 +1,14 @@
 # GitHub Release Signing Setup
 
-This page describes how to configure signed Route42 release builds with GitHub Actions.
+This page describes the Route42 signed release flow with GitHub Actions.
+
+For this repository, the canonical signed release build happens on GitHub Actions.
+The required signing secrets are already configured in the GitHub repository, so release
+signing should be triggered from GitHub, not by committing local keystore material.
 
 ## Required GitHub Secrets
 
-Add these repository secrets in GitHub:
+The workflow expects these repository secrets in GitHub:
 
 - `ROUTE42_KEYSTORE_BASE64`
 - `ROUTE42_KEYSTORE_PASSWORD`
@@ -58,6 +62,13 @@ export ROUTE42_KEY_PASSWORD="your-key-password"
 
 If these values are not set, Gradle falls back to the normal unsigned release output.
 
+For this repo, local signed builds are optional and mainly useful for maintainer-only recovery.
+The normal release path is:
+
+1. push the release commit to `main`;
+2. create and push a version tag such as `v0.1.1`;
+3. let the `Release APK` GitHub Actions workflow build, sign, and publish the APK.
+
 ## Expected Release Output
 
 - Signed local build: `app/build/outputs/apk/release/app-release.apk`
@@ -66,6 +77,6 @@ If these values are not set, Gradle falls back to the normal unsigned release ou
 ## Recommended Tag Flow
 
 1. Push your changes to `main`.
-2. Create a version tag such as `v0.1.0`.
+2. Create a version tag such as `v0.1.1`.
 3. Push the tag.
 4. GitHub Actions builds a signed APK and uploads it to the matching GitHub Release.

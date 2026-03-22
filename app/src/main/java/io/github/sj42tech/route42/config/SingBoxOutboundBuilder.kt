@@ -62,12 +62,23 @@ private fun buildProxyOutbound(profile: ConnectionProfile): JsonObject = buildJs
 private fun buildTransport(profile: ConnectionProfile): JsonObject? {
     val transportType = profile.endpoint.network.trim().lowercase()
     if (transportType.isBlank() || transportType == "tcp") {
-        return null
+        return buildTcpTransport(profile.endpoint.extraQueryParameters)
     }
 
     val extras = profile.endpoint.extraQueryParameters
     return buildJsonObject {
         when (transportType) {
+            "raw" -> return buildTcpTransport(extras)
+
+            "http" -> {
+                put("type", "http")
+                extras.csvValues("host").takeIf(List<String>::isNotEmpty)?.let { hosts ->
+                    put("host", jsonArrayOf(*hosts.toTypedArray()))
+                }
+                extras.firstValue("path")?.let { put("path", it) }
+                extras.firstValue("method")?.let { put("method", it) }
+            }
+
             "ws", "websocket" -> {
                 put("type", "ws")
                 extras.firstValue("path")?.let { put("path", it) }
@@ -79,11 +90,18 @@ private fun buildTransport(profile: ConnectionProfile): JsonObject? {
                         },
                     )
                 }
+                extras.firstValue("ed", "maxEarlyData")
+                    ?.toIntOrNull()
+                    ?.takeIf { it > 0 }
+                    ?.let { put("max_early_data", it) }
+                extras.firstValue("eh", "earlyDataHeaderName")
+                    ?.let { put("early_data_header_name", it) }
             }
 
             "grpc" -> {
                 put("type", "grpc")
-                extras.firstValue("serviceName")?.let { put("service_name", it) }
+                extras.firstValue("serviceName", "service_name")?.let { put("service_name", it) }
+                extras.firstValue("authority")?.let { put("authority", it) }
             }
 
             "httpupgrade" -> {
@@ -96,7 +114,32 @@ private fun buildTransport(profile: ConnectionProfile): JsonObject? {
                 put("type", "quic")
             }
 
-            else -> return null
+            "xhttp" -> throw UnsupportedEndpointConfigurationException(
+                "XHTTP transport is not supported by the current Route42 sing-box client",
+            )
+
+            else -> throw UnsupportedEndpointConfigurationException(
+                "Unsupported transport type: ${profile.endpoint.network}",
+            )
         }
+    }
+}
+
+private fun buildTcpTransport(extras: Map<String, List<String>>): JsonObject? {
+    val headerType = extras.firstValue("headerType")?.lowercase()
+    return when {
+        headerType.isNullOrBlank() || headerType == "none" -> null
+        headerType == "http" -> buildJsonObject {
+            put("type", "http")
+            extras.csvValues("host").takeIf(List<String>::isNotEmpty)?.let { hosts ->
+                put("host", jsonArrayOf(*hosts.toTypedArray()))
+            }
+            extras.firstValue("path")?.let { put("path", it) }
+            extras.firstValue("method")?.let { put("method", it) }
+        }
+
+        else -> throw UnsupportedEndpointConfigurationException(
+            "Unsupported TCP header type: $headerType",
+        )
     }
 }

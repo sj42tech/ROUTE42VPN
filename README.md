@@ -90,10 +90,10 @@ This applies to:
 
 This repo includes a signed release APK workflow for GitHub Actions.
 
-- Configure the required GitHub secrets described in [docs/github-release-signing.md](docs/github-release-signing.md).
+- The canonical signed release path for this repo is GitHub Actions, and the required signing secrets are already configured there.
 - A local helper script is available at `secrets/print-github-secrets.sh` to print the four GitHub secret values from ignored local files.
 - Run the `Release APK` workflow manually to build a signed release artifact.
-- Push a tag like `v0.1.0` to build a signed APK and attach it to the matching GitHub Release.
+- Push a tag like `v0.1.1` to build a signed APK and attach it to the matching GitHub Release.
 
 ## Support Route42
 

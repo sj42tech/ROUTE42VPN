@@ -110,7 +110,7 @@ internal fun publishDefaultInterfaceSnapshot(
     listener.updateDefaultInterface(interfaceName, interfaceIndex, isExpensive, false)
 }
 
-internal fun collectNetworkInterfaces(myInterfaceName: String?): NetworkInterfaceIterator {
+internal fun collectNetworkInterfaces(): NetworkInterfaceIterator {
     val javaInterfaces = JavaNetworkInterface.getNetworkInterfaces()?.toList().orEmpty()
     val mapped = linkedMapOf<String, NetworkInterface>()
     @Suppress("DEPRECATION")
@@ -119,7 +119,6 @@ internal fun collectNetworkInterfaces(myInterfaceName: String?): NetworkInterfac
         val linkProperties = Route42Application.connectivity.getLinkProperties(network) ?: continue
         val networkCapabilities = Route42Application.connectivity.getNetworkCapabilities(network) ?: continue
         val interfaceName = linkProperties.interfaceName ?: continue
-        if (interfaceName == myInterfaceName) continue
         val javaInterface = javaInterfaces.firstOrNull { it.name == interfaceName } ?: continue
         val flags = buildInterfaceFlags(javaInterface, networkCapabilities)
         mapped[interfaceName] = NetworkInterface().apply {

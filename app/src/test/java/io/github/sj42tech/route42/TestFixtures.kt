@@ -26,6 +26,7 @@ object TestFixtures {
     fun sampleProfile(
         routingMode: RoutingMode = RoutingMode.RULE,
         dnsMode: DnsMode = DnsMode.SPLIT,
+        endpoint: EndpointConfig = sampleEndpoint(),
         rules: List<RoutingRule> = listOf(
             RoutingRule(
                 action = RoutingAction.DIRECT,
@@ -40,22 +41,28 @@ object TestFixtures {
         ),
     ): ConnectionProfile = ConnectionProfile(
         name = ProfileName,
-        endpoint = EndpointConfig(
-            server = Server,
-            serverPort = Port,
-            uuid = Uuid,
-            network = "tcp",
-            security = "reality",
-            flow = "xtls-rprx-vision",
-            serverName = ServerName,
-            fingerprint = "chrome",
-            publicKey = PublicKey,
-            shortId = ShortId,
-        ),
+        endpoint = endpoint,
         routing = RoutingProfile(
             mode = routingMode,
             dnsMode = dnsMode,
             rules = rules,
         ),
     )
+
+    fun sampleEndpoint(
+        network: String = "tcp",
+        extraQueryParameters: Map<String, List<String>> = emptyMap(),
+    ): EndpointConfig = EndpointConfig(
+            server = Server,
+            serverPort = Port,
+            uuid = Uuid,
+            network = network,
+            security = "reality",
+            flow = "xtls-rprx-vision",
+            serverName = ServerName,
+            fingerprint = "chrome",
+            publicKey = PublicKey,
+            shortId = ShortId,
+            extraQueryParameters = extraQueryParameters,
+        )
 }

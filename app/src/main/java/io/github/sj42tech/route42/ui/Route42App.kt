@@ -16,6 +16,8 @@ import io.github.sj42tech.route42.ui.screens.ProfileDetailScreen
 import io.github.sj42tech.route42.ui.screens.ProfilesScreen
 import io.github.sj42tech.route42.ui.screens.RoutingEditorScreen
 import io.github.sj42tech.route42.ui.theme.Route42Theme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private object AppRoute {
     const val Profiles = "profiles"
@@ -55,9 +57,11 @@ fun Route42App(viewModel: AppViewModel) {
                         onBack = { navController.popBackStack() },
                         onSave = { profile ->
                             val profileId = viewModel.upsertProfile(profile)
-                            navController.navigate(AppRoute.details(profileId)) {
-                                popUpTo(AppRoute.Import) {
-                                    inclusive = true
+                            withContext(Dispatchers.Main.immediate) {
+                                navController.navigate(AppRoute.details(profileId)) {
+                                    popUpTo(AppRoute.Import) {
+                                        inclusive = true
+                                    }
                                 }
                             }
                         },

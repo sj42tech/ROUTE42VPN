@@ -24,6 +24,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.sj42tech.route42.config.SingBoxConfigGenerator
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.parser.VlessLinkParser
@@ -45,6 +46,13 @@ internal fun ImportLinkScreen(
     }
     val parsedProfile = parseResult?.getOrNull()
     val parseError = parseResult?.exceptionOrNull()?.message
+    val configError = remember(parsedProfile) {
+        parsedProfile?.let { profile ->
+            runCatching { SingBoxConfigGenerator.generate(profile) }
+                .exceptionOrNull()
+                ?.message
+        }
+    }
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
@@ -89,11 +97,22 @@ internal fun ImportLinkScreen(
                     }
                 }
             }
+            if (configError != null) {
+                item {
+                    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = configError,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(16.dp),
+                        )
+                    }
+                }
+            }
             if (parsedProfile != null) {
                 item {
                     ImportPreviewCard(profile = parsedProfile)
                 }
-                item {
+                if (configError == null) item {
                     Button(
                         onClick = {
                             coroutineScope.launch {

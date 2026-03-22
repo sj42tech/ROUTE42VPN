@@ -10,3 +10,13 @@ internal fun jsonArrayOf(vararg values: String): JsonArray = buildJsonArray {
 
 internal fun Map<String, List<String>>.firstValue(key: String): String? =
     get(key)?.firstOrNull()?.takeIf(String::isNotBlank)
+
+internal fun Map<String, List<String>>.firstValue(vararg keys: String): String? =
+    keys.firstNotNullOfOrNull(::firstValue)
+
+internal fun Map<String, List<String>>.csvValues(vararg keys: String): List<String> =
+    firstValue(*keys)
+        ?.split(',')
+        ?.map(String::trim)
+        ?.filter(String::isNotEmpty)
+        .orEmpty()
