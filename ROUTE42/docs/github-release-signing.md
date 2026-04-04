@@ -17,11 +17,11 @@ The workflow expects these repository secrets in GitHub:
 
 ## Local Secrets Helper
 
-Route42 includes a local helper directory at `secrets/`.
+Route42 uses the repository-level local helper directory at `../secrets/` when you work from `ROUTE42/`.
 
 - Keep your real keystore and passwords there locally.
 - Those files are ignored by `.gitignore`.
-- Use `bash secrets/print-github-secrets.sh` to print the four GitHub secret values in the correct order for copy/paste.
+- Use `bash ../secrets/print-github-secrets.sh` to print the four GitHub secret values in the correct order for copy/paste.
 
 ## What The Workflow Does
 
@@ -46,7 +46,7 @@ base64 < route42-release.keystore | tr -d '\n'
 
 Copy the resulting single-line string into the `ROUTE42_KEYSTORE_BASE64` GitHub secret.
 
-If you prefer, place the keystore or the precomputed base64 string in `secrets/` and use the helper script instead of running the command manually.
+If you prefer, place the keystore or the precomputed base64 string in `../secrets/` and use the helper script instead of running the command manually.
 
 ## Local Signed Release Build
 
