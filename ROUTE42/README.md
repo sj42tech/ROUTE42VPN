@@ -14,7 +14,7 @@ Route42 is an independent client project and is not an official sing-box client.
 
 Route42 is distributed under `GPL-3.0-or-later`. Third-party components remain under their own licenses.
 
-See [NOTICE.md](NOTICE.md), [LICENSE](../LICENSE), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the current licensing and third-party component records.
+See [NOTICE.md](NOTICE.md), [LICENSE](LICENSE), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the current licensing and third-party component records.
 
 ## Before You Start
 
@@ -78,7 +78,7 @@ This applies to:
 
 - [PROJECT_RULES.md](PROJECT_RULES.md)
 - [NOTICE.md](NOTICE.md)
-- [LICENSE](../LICENSE)
+- [LICENSE](LICENSE)
 - [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
 - [docs/github-repository-metadata.md](docs/github-repository-metadata.md)
 - [docs/android-vless-client-overview.md](docs/android-vless-client-overview.md)
@@ -95,6 +95,7 @@ This applies to:
 
 ## Workspace Docs
 
+- [docs/workspace-layout.md](docs/workspace-layout.md)
 - [../SJLABORATORY/docs/vps-audit-2026-03-22.md](../SJLABORATORY/docs/vps-audit-2026-03-22.md)
 - [../SJLABORATORY/docs/exoscale-vps-onboarding.md](../SJLABORATORY/docs/exoscale-vps-onboarding.md)
 - [../SJLABORATORY/docs/uhost-vps-onboarding.md](../SJLABORATORY/docs/uhost-vps-onboarding.md)

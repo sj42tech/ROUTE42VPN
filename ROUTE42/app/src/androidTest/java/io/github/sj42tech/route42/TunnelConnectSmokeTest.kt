@@ -17,6 +17,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -26,7 +27,7 @@ class TunnelConnectSmokeTest {
 
     @Test
     fun importsRealityProfileAndReachesRunningState() {
-        importProfile(BaselineRealityLink)
+        importProfile(requireLiveBaselineLink())
         composeRule.onNodeWithText("Connect").performClick()
 
         assertVpnConnected()
@@ -34,7 +35,7 @@ class TunnelConnectSmokeTest {
 
     @Test
     fun runsLinkHealthCheckFromProfileScreen() {
-        importProfile(BaselineRealityLink)
+        importProfile(requireLiveBaselineLink())
         composeRule.onNodeWithText("Run Check").assertIsDisplayed().performClick()
 
         composeRule.waitUntil(timeoutMillis = 20_000) {
@@ -50,7 +51,7 @@ class TunnelConnectSmokeTest {
     @Test
     fun rejectsBrokenRealityLinkOnImportScreen() {
         composeRule.onNodeWithText("Import").assertIsDisplayed().performClick()
-        composeRule.onNode(hasSetTextAction()).performTextInput(BrokenRealityLink)
+        composeRule.onNode(hasSetTextAction()).performTextInput(ExampleBrokenRealityLink)
         composeRule.waitUntil(timeoutMillis = 10_000) {
             runCatching { composeRule.onNodeWithText("Reality link is missing SNI").assertIsDisplayed() }.isSuccess
         }
@@ -59,7 +60,7 @@ class TunnelConnectSmokeTest {
 
     @Test
     fun sharesRuLocalPresetAcrossTwoProfilesAndConnects() {
-        importProfile(BaselineRealityLink)
+        importProfile(requireLiveBaselineLink())
         composeRule.onNodeWithText("Choose Routing Profile").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Create RU + Local Profile").assertIsDisplayed().performClick()
         composeRule.waitUntil(timeoutMillis = 10_000) {
@@ -67,7 +68,7 @@ class TunnelConnectSmokeTest {
         }
 
         composeRule.onNodeWithText("Back").performClick()
-        importProfile(SharedRealityLink)
+        importProfile(requireLiveSharedLink())
         composeRule.onNodeWithText("Choose Routing Profile").assertIsDisplayed().performClick()
         composeRule.onNode(hasScrollAction()).performScrollToNode(hasText("Rule (RU + Local)"))
         composeRule.onNodeWithText("Use Rule", substring = true).assertIsDisplayed().performClick()
@@ -82,7 +83,7 @@ class TunnelConnectSmokeTest {
 
     @Test
     fun opensShareCodeScreenForImportedProfile() {
-        importProfile(BaselineRealityLink)
+        importProfile(ExampleRealityLink)
         composeRule.onNodeWithText("Choose Routing Profile").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Create RU + Local Profile").assertIsDisplayed().performClick()
         composeRule.waitUntil(timeoutMillis = 10_000) {
@@ -92,7 +93,7 @@ class TunnelConnectSmokeTest {
         composeRule.onNodeWithText("Show Code").assertIsDisplayed().performClick()
         composeRule.waitUntil(timeoutMillis = 10_000) {
             runCatching {
-                composeRule.onNodeWithContentDescription("Share code for android-smoke").assertIsDisplayed()
+                composeRule.onNodeWithContentDescription("Share code for example-smoke").assertIsDisplayed()
             }.isSuccess
         }
         composeRule.onNodeWithText("Scan this code in Route42 on another device to import the same connection.").assertIsDisplayed()
@@ -125,20 +126,35 @@ class TunnelConnectSmokeTest {
         )
     }
 
+    private fun requireLiveBaselineLink(): String =
+        requireInstrumentationArgument("route42.live_link")
+
+    private fun requireLiveSharedLink(): String =
+        readInstrumentationArgument("route42.shared_live_link")
+            ?.takeUnless(String::isBlank)
+            ?: withProfileName(requireLiveBaselineLink(), "android-shared")
+
+    private fun requireInstrumentationArgument(name: String): String {
+        val value = readInstrumentationArgument(name)
+        assumeTrue("Missing instrumentation argument: $name", !value.isNullOrBlank())
+        return checkNotNull(value)
+    }
+
+    private fun readInstrumentationArgument(name: String): String? =
+        InstrumentationRegistry.getArguments().getString(name)?.trim()
+
+    private fun withProfileName(link: String, profileName: String): String =
+        "${link.substringBefore('#')}#$profileName"
+
     private companion object {
-        const val BaselineRealityLink =
-            "vless://775ed879-a162-45e3-b8af-c49f96eaede5@5.39.219.74:443?" +
-                "encryption=none&security=reality&sni=www.debian.org&" +
-                "fp=chrome&pbk=xAjc3oJaoU9psF_G2zQB5N-HV1ClgKQ1K8atsPPL6CY&sid=a1&type=tcp#android-smoke"
+        const val ExampleRealityLink =
+            "vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?" +
+                "encryption=none&security=reality&sni=cdn.example&" +
+                "fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&type=tcp#example-smoke"
 
-        const val SharedRealityLink =
-            "vless://775ed879-a162-45e3-b8af-c49f96eaede5@5.39.219.74:443?" +
-                "encryption=none&security=reality&sni=www.debian.org&" +
-                "fp=chrome&pbk=xAjc3oJaoU9psF_G2zQB5N-HV1ClgKQ1K8atsPPL6CY&sid=a1&type=tcp#android-shared"
-
-        const val BrokenRealityLink =
-            "vless://775ed879-a162-45e3-b8af-c49f96eaede5@5.39.219.74:443?" +
+        const val ExampleBrokenRealityLink =
+            "vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?" +
                 "encryption=none&security=reality&" +
-                "fp=chrome&pbk=xAjc3oJaoU9psF_G2zQB5N-HV1ClgKQ1K8atsPPL6CY&sid=a1&type=tcp#android-broken"
+                "fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&type=tcp#example-broken"
     }
 }

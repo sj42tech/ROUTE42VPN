@@ -55,7 +55,7 @@ class ProfileHealthCheckTest {
             tunnelState = TunnelState(
                 status = TunnelStatus.RUNNING,
                 profileId = "profile-1",
-                publicIp = "5.39.219.74",
+                publicIp = "203.0.113.10",
                 directPublicIp = "198.51.100.10",
             ),
             profileId = "profile-1",
@@ -68,7 +68,7 @@ class ProfileHealthCheckTest {
                 tunnelState = TunnelState(
                     status = TunnelStatus.RUNNING,
                     profileId = "profile-1",
-                    publicIp = "5.39.219.74",
+                    publicIp = "203.0.113.10",
                     directPublicIp = "198.51.100.10",
                 ),
                 profileId = "profile-1",

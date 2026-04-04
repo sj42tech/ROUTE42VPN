@@ -6,6 +6,6 @@ You can redistribute it and/or modify it under the terms of the GNU General Publ
 
 This notice applies to the Route42 project code and documentation unless a file or bundled third-party component states otherwise.
 
-Route42 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY. See [LICENSE](../LICENSE) for the full GNU GPL v3 text.
+Route42 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY. See [LICENSE](LICENSE) for the full GNU GPL v3 text.
 
 Third-party components remain under their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for bundled dependency records.

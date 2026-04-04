@@ -1,42 +1,48 @@
-# Route42 VPS Data Matrix Codes
+# Route42 Local Share Code Workflow
 
-Generated on `2026-04-04` from the current Route42 VLESS links for the three VPS endpoints.
+This note describes the Route42 camera-import flow without storing live VPS links in the public app layer.
 
-How to use:
-- Open Route42 on the target Android device.
-- Tap `Import`.
-- Tap `Scan Code`.
-- Hold one of these Data Matrix codes in front of the camera until the profile preview appears.
+## In-App Flow
 
-## Hostkey
+To import from another device:
 
-Link:
+- open Route42 on the target Android device;
+- tap `Import`;
+- tap `Scan Code`;
+- scan a `Data Matrix` or `QR` code that contains a `vless://` link.
 
-```text
-vless://775ed879-a162-45e3-b8af-c49f96eaede5@5.39.219.74:443?encryption=none&security=reality&sni=www.debian.org&fp=chrome&pbk=xAjc3oJaoU9psF_G2zQB5N-HV1ClgKQ1K8atsPPL6CY&sid=a1&type=tcp#Hostkey
-```
+## Public Repository Rule
 
-Image: [hostkey-vless-datamatrix.png](/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ROUTE42/docs/share-codes/hostkey-vless-datamatrix.png)
+Live share links and generated share-code images must not be committed to `ROUTE42`.
 
-## Exoscale
+Keep them in ignored local lab storage instead, for example:
 
-Link:
+- `../SJLABORATORY/secrets/ROUTE42/live-vps-links.tsv`
+- `../SJLABORATORY/secrets/ROUTE42/share-codes/`
 
-```text
-vless://775ed879-a162-45e3-b8af-c49f96eaede5@194.182.174.240:443?encryption=none&security=reality&sni=www.debian.org&fp=chrome&pbk=xAjc3oJaoU9psF_G2zQB5N-HV1ClgKQ1K8atsPPL6CY&sid=a1&type=tcp#Exoscale
-```
+## Local Manifest Format
 
-Image: [exoscale-vless-datamatrix.png](/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ROUTE42/docs/share-codes/exoscale-vless-datamatrix.png)
-
-## AWS
-
-Link:
+The generic rendering helper expects a two-column TSV file:
 
 ```text
-vless://775ed879-a162-45e3-b8af-c49f96eaede5@3.34.30.191:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=vk.com&fp=chrome&pbk=J3MXsoLLi7QnTkStJB45USiju6bVucQgrDqnCmmTSlw&sid=f3aa&type=tcp#AWS
+# filename<TAB>vless-link
+example-profile-datamatrix.png	vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=cdn.example&fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&type=tcp#example-profile
 ```
 
-Image: [aws-vless-datamatrix.png](/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ROUTE42/docs/share-codes/aws-vless-datamatrix.png)
+## Rendering Helper
 
-Regeneration:
-- Compile and run [RenderVpsDataMatrix.java](/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ROUTE42/tools/RenderVpsDataMatrix.java).
+Use [RenderVpsDataMatrix.java](/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ROUTE42/tools/RenderVpsDataMatrix.java) with:
+
+- a local manifest path as the first argument;
+- an optional output directory as the second argument.
+
+The default output directory is `build/share-codes`.
+
+Generated images should stay in ignored local storage rather than tracked app docs.
+
+## Recommended Local-Only Workflow
+
+1. Maintain live share links in ignored `../SJLABORATORY/secrets/ROUTE42/live-vps-links.tsv`.
+2. Render local share codes into ignored `../SJLABORATORY/secrets/ROUTE42/share-codes/`.
+3. Use Route42 camera import on the target Android device.
+4. Keep any live notes or exported links in `SJLABORATORY/secrets/ROUTE42/`, not in tracked `ROUTE42` docs.

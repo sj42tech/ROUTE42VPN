@@ -1,17 +1,20 @@
 # Route42 Team VPS And Routing Brief 2026-04-04
 
-This note is a direct handoff brief for the `Route42` Android team.
+This note is a product handoff brief for the `Route42` Android team.
 
 Its purpose is to give the app team two things:
 
-- a clear picture of the currently running self-hosted VPS fleet behind the project;
-- a practical routing recommendation for `RU + local` direct traffic so the Android client can evolve its split-routing behavior without reverse-engineering the desktop lab setup.
+- a clean backend model for a multi-profile VPN client;
+- a practical routing recommendation for `RU + local` direct traffic.
+
+Live provider names, IP addresses, Reality tuples, and reusable share links are intentionally not stored in the public `ROUTE42` layer.
+Those operational details belong only in ignored local lab files under `../SJLABORATORY/secrets/ROUTE42/`.
 
 ## Why This Exists
 
 The desktop and VPS lab around this project already proved a few practical things:
 
-- multiple VPS backends are needed, because network quality changes by provider, ASN, and operator;
+- multiple backend profiles are needed, because network quality changes by provider, ASN, and operator;
 - direct local traffic should not be forced into the tunnel;
 - Russian domestic traffic often benefits from a conservative direct policy;
 - the Android client should treat transport settings and routing policy as separate layers.
@@ -22,21 +25,30 @@ In other words:
 - split-routing policy is another layer;
 - the app should model both cleanly.
 
-## Current Running VPS Fleet
+## Recommended Backend Fleet Shape
 
-As of `2026-04-04`, the project has three active self-hosted VPS nodes.
+The app should assume that one user can have more than one active backend profile at the same time.
 
-| Role | Provider | Public IP | Region | Notes |
-| --- | --- | --- | --- | --- |
-| Primary | `Hostkey` | `5.39.219.74` | Amsterdam, NL | Current best live path and desktop baseline |
-| Reserve | `Exoscale` | `194.182.174.240` | Vienna, AT | Useful reserve and comparison path |
-| Experimental | `AWS` | `3.34.30.191` | Seoul region, KR | Kept for comparison, but currently weaker as a route |
+Recommended product stance:
 
-### Common server-side transport profile
+- one profile can be `Primary`;
+- one can be `Reserve`;
+- one can be `Experimental`.
 
-All three servers are currently aligned on the same broad server-side shape:
+The app does not need automatic failover first, but it should make manual switching and comparison easy.
 
-- `Xray 26.2.6`
+At minimum:
+
+- saved profiles should preserve friendly labels such as `Primary`, `Reserve`, and `Experimental`;
+- the app should make it obvious which profile is the current default;
+- transport data must stay profile-specific;
+- routing policy can be shared across profiles.
+
+## Common Transport Assumptions
+
+All backend profiles are expected to follow the same broad server-side shape:
+
+- `Xray`
 - `VLESS`
 - `Reality`
 - `TCP`
@@ -56,42 +68,23 @@ That means:
 - the Android app should import and store those fields from the `vless://` link;
 - the app must not hardcode one provider, one SNI, or one Reality keypair as product behavior.
 
-## Practical Fleet Recommendation For The App
-
-The Android app should assume that one user can have more than one active backend profile at the same time.
-
-Recommended product stance:
-
-- one profile can be `primary`
-- one can be `reserve`
-- one can be `experimental`
-
-The app does not need automatic failover first, but it should make manual switching and comparison easy.
-
-At minimum:
-
-- saved profiles should preserve friendly labels such as `Hostkey`, `Exoscale`, `AWS`;
-- the app should make it obvious which profile is the current default;
-- transport data must stay profile-specific;
-- routing policy can be shared across profiles.
-
 ## Current Desktop Routing Policy
 
 The desktop lab has already converged on a practical split-routing policy.
 
 The current behavior is:
 
-- local and special-use IP space goes `direct`
-- local naming zones go `direct`
-- a conservative set of RU-oriented TLDs goes `direct`
-- `geoip:ru` goes `direct`
-- selected large domestic services also go `direct`
-- everything else goes through the proxy tunnel
+- local and special-use IP space goes `direct`;
+- local naming zones go `direct`;
+- a conservative set of RU-oriented TLDs goes `direct`;
+- the RU IP rule layer goes `direct`;
+- selected large domestic services also go `direct`;
+- everything else goes through the proxy tunnel.
 
 This is the important mental model for the Android team:
 
-- `transport settings` tell the app how to reach the VPS;
-- `routing settings` tell the app what should bypass that VPS.
+- `transport settings` tell the app how to reach the backend;
+- `routing settings` tell the app what should bypass that backend.
 
 ## Recommended Built-In Direct Rules
 
@@ -114,16 +107,6 @@ Recommended direct CIDR set:
 - `fc00::/7`
 - `fe80::/10`
 - `ff00::/8`
-
-This set covers:
-
-- loopback
-- RFC1918 private LAN
-- CGNAT
-- link-local
-- benchmarking/test ranges
-- multicast
-- local IPv6 and ULA space
 
 The app should treat these as hard safety exclusions and keep them `direct` in every normal routing mode.
 
@@ -148,24 +131,22 @@ Recommended built-in direct suffixes:
 - `.москва` represented as `xn--80adxhks`
 - `.рус` represented as `xn--p1acf`
 
-This is a broader and more realistic set than only `.ru` and `.rf`.
-
 Important product note:
 
 - these should be built-in defaults for the `RU + Local` mode;
 - they should still be visible and overrideable by advanced users.
 
-### 4. Recommended direct: geoip Russia
+### 4. Recommended direct: RU IP rule layer
 
-Recommended built-in direct geo policy:
+Recommended built-in direct country-IP policy:
 
-- `geoip:ru`
+- a local RU IP rule-set asset
 
 Reason:
 
 - many domestic services are not cleanly modeled by suffix alone;
 - not everything relevant lives under `.ru`;
-- a country-IP direct rule is a useful second layer under the suffix rules.
+- an IP-based direct rule is a useful second layer under the suffix rules.
 
 ## Recommended Domestic Direct Domain Set
 
@@ -189,14 +170,10 @@ Recommended exact or suffix direct entries:
 - `ozon.ru`
 - `rambler.ru`
 
-This list should not necessarily be hardwired forever.
-
 Recommended app behavior:
 
-- ship these as a preset bundle for `Rule (RU + Local)`
-- let the user inspect, add, disable, or remove individual entries later
-
-That gives the product a strong default without making it rigid.
+- ship these as a preset bundle for `Rule (RU + Local)`;
+- let the user inspect, add, disable, or remove individual entries later.
 
 ## Recommended Final Routing Behavior
 
@@ -205,7 +182,7 @@ The Android app should support a practical rule mode shaped like this:
 1. local and special-use IP ranges -> `direct`
 2. local naming zones -> `direct`
 3. RU-oriented built-in suffixes -> `direct`
-4. `geoip:ru` -> `direct`
+4. RU IP rule-set -> `direct`
 5. curated domestic domain bundle -> `direct`
 6. explicit user direct rules -> `direct`
 7. explicit user proxy rules -> `proxy`
@@ -214,9 +191,9 @@ The Android app should support a practical rule mode shaped like this:
 
 This gives a clean result:
 
-- local network keeps working
-- domestic services do not waste tunnel capacity
-- foreign traffic still uses the tunnel by default
+- local network keeps working;
+- domestic services do not waste tunnel capacity;
+- foreign traffic still uses the tunnel by default.
 
 ## Recommended DNS Behavior
 
@@ -227,10 +204,8 @@ For this routing mode, the best default is:
 
 Practical expectation:
 
-- direct-bound local and domestic traffic should be allowed to use local/direct DNS
-- proxy-bound traffic should resolve over proxy DNS
-
-The app does not need to expose every implementation detail to the user, but the internal generator should preserve this separation.
+- direct-bound local and domestic traffic should be allowed to use local/direct DNS;
+- proxy-bound traffic should resolve over proxy DNS.
 
 ## Product Guidance For Route42
 
@@ -238,13 +213,12 @@ Recommended next product changes:
 
 ### 1. Expand built-in `rule` mode
 
-Current docs mention built-ins like `.ru` and `.rf`.
-The more practical recommended built-in profile is now:
+The more practical recommended built-in profile is:
 
 - local/private CIDRs
 - `localhost`, `.local`, `.home.arpa`
 - `.ru`, `.su`, `.рф`, `.дети`, `.москва`, `.рус`
-- `geoip:ru`
+- RU IP rule-set
 
 ### 2. Separate preset policy from user rules
 
@@ -253,8 +227,6 @@ The app should distinguish:
 - built-in preset rules
 - imported link rules
 - manually edited rules
-
-This makes it easier to update the preset later without corrupting user intent.
 
 ### 3. Keep transport import strict and routing import flexible
 
@@ -290,15 +262,15 @@ It should assume multiple saved backends and one reusable routing policy layer.
 
 For the app team, the clean implementation model is:
 
-- a `ConnectionProfile` points at one VPS backend
-- a `RoutingProfile` defines split behavior
-- one routing profile can be reused by several VPS profiles
+- a `ConnectionProfile` points at one backend;
+- a `RoutingProfile` defines split behavior;
+- one routing profile can be reused by several connection profiles.
 
-That allows this exact real-world setup:
+That allows this exact app shape:
 
-- `Hostkey` profile
-- `Exoscale` profile
-- `AWS` profile
+- `Primary` profile
+- `Reserve` profile
+- `Experimental` profile
 - one shared `RU + Local` routing profile
 
 ## Good First Implementation Target
@@ -311,15 +283,12 @@ If the team wants the smallest useful next step, this is it:
    - direct local CIDRs
    - direct local names
    - direct RU suffixes
-   - direct `geoip:ru`
+   - direct RU IP rule-set
 4. let users add optional custom direct domains on top
-
-That alone would already match the desktop operational policy much better than a narrower `.ru/.rf only` rule set.
 
 ## Operational Summary
 
-The VPS fleet is real, active, and multi-provider.
-The routing policy is now the bigger product opportunity.
+The backend fleet is live, active, and multi-provider, but its exact inventory belongs only in ignored local lab notes.
 
 The Android app should evolve toward:
 
@@ -328,16 +297,14 @@ The Android app should evolve toward:
 - stronger built-in `RU + Local` direct behavior
 - user-editable overrides on top of those defaults
 
-That would bring `Route42` much closer to the routing behavior that is already proving useful in the desktop lab.
-
 ## Implementation Status In App
 
 As of `2026-04-04`, the Android app already implements the main shape recommended in this brief:
 
 - `ConnectionProfile` and `RoutingProfile` are stored separately
-- one routing profile can be reused by several saved VPS profiles
+- one routing profile can be reused by several saved backend profiles
 - the built-in preset `Rule (RU + Local)` exists in the app UI
-- `geoip:ru` is implemented through a local sing-box binary `rule_set`, not the removed legacy `geoip` matcher
+- the RU IP direct layer is implemented through a local sing-box binary `rule_set`, not the removed legacy `geoip` matcher
 - imported `x-route42-*` rules and manual user rules are tracked separately in the UI
 - `Reality` transport import is strict and requires `sni`, `fp`, `pbk`, and `sid`
 
