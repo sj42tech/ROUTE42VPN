@@ -58,6 +58,7 @@ These rules are mandatory for every project file: source code, tests, Markdown d
 ## 7. Security And Privacy
 
 - Never commit real secrets or live configs.
+- Live VPS tuples, share links, and fleet inventories must stay in ignored local lab files, not in tracked `ROUTE42` sources.
 - Every sample profile must be a safe template.
 - If a file contains real data, replace it with placeholders or remove it from the project.
 
