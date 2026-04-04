@@ -12,29 +12,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import io.github.sj42tech.route42.config.SingBoxConfigGenerator
 import io.github.sj42tech.route42.model.ConnectionProfile
+import io.github.sj42tech.route42.model.RoutingProfile
 import io.github.sj42tech.route42.tunnel.TunnelRuntime
 import io.github.sj42tech.route42.tunnel.TunnelServiceController
 
 @Composable
-internal fun rememberTunnelConnectAction(): (ConnectionProfile) -> Unit {
+internal fun rememberTunnelConnectAction(): (ConnectionProfile, RoutingProfile) -> Unit {
     val context = LocalContext.current
-    var pendingProfile by remember { mutableStateOf<ConnectionProfile?>(null) }
+    var pendingProfile by remember { mutableStateOf<Pair<ConnectionProfile, RoutingProfile>?>(null) }
     val vpnPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         val profile = pendingProfile
         pendingProfile = null
         if (result.resultCode == Activity.RESULT_OK && profile != null) {
-            startTunnel(context, profile)
+            startTunnel(context, profile.first, profile.second)
         }
     }
 
-    return { profile ->
+    return { profile, routingProfile ->
         val prepareIntent = VpnService.prepare(context)
         if (prepareIntent == null) {
-            startTunnel(context, profile)
+            startTunnel(context, profile, routingProfile)
         } else {
-            pendingProfile = profile
+            pendingProfile = profile to routingProfile
             vpnPermissionLauncher.launch(prepareIntent)
         }
     }
@@ -43,8 +44,9 @@ internal fun rememberTunnelConnectAction(): (ConnectionProfile) -> Unit {
 private fun startTunnel(
     context: android.content.Context,
     profile: ConnectionProfile,
+    routingProfile: RoutingProfile,
 ) {
-    val config = runCatching { SingBoxConfigGenerator.generate(profile) }
+    val config = runCatching { SingBoxConfigGenerator.generate(profile, routingProfile) }
         .getOrElse { error ->
             TunnelRuntime.setError(error.message ?: "Unable to generate tunnel config")
             return

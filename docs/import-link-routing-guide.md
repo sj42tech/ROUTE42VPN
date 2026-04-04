@@ -20,10 +20,11 @@ This guide describes:
 After saving:
 
 - the raw share link is not stored as part of the saved profile;
-- the app converts the link into an internal profile model;
+- the app converts the link into a `ConnectionProfile` plus a reusable `RoutingProfile`;
 - transport settings stay in the connection profile;
+- imported routing rules are tagged as imported in the UI;
 - routing mode, DNS mode, and imported rules become editable on the profile screens;
-- routing rules can then be changed manually on the `Routes` screen.
+- routing rules can then be changed manually on the `Routes` screen or reused from another saved routing profile.
 
 ## Minimal Supported Link Format
 
@@ -40,6 +41,15 @@ vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?encryption=none&fl
 ```
 
 The app currently supports only `vless://` links in MVP.
+
+If the link uses `security=reality`, the current build requires all of these fields before save:
+
+- `sni`
+- `fp`
+- `pbk`
+- `sid`
+
+If any of them is missing, import fails on the preview screen instead of creating a broken saved profile.
 
 ## Standard VLESS Parameters
 
@@ -93,13 +103,13 @@ Behavior:
 | --- | --- |
 | `direct` | Final outbound is direct. Custom rules still exist and can override specific destinations. |
 | `proxy` | Final outbound is proxy. This is the default if the parameter is omitted. |
-| `rule` | Final outbound is proxy, but built-in exceptions for private/LAN and `.ru` / `.rf` are added as direct routes. |
+| `rule` | Final outbound is proxy, but rule-based matching is enabled and built-in local safety exclusions still stay direct. |
 
 Important details:
 
-- private IP ranges are always routed direct;
-- `lan`, `local`, and `home.arpa` are always routed direct;
-- `.ru` and `.rf` are routed direct only when `x-route42-mode=rule`.
+- local and special-use IP ranges are always routed direct;
+- `localhost`, `lan`, `local`, and `home.arpa` are always routed direct;
+- the built-in `Rule (RU + Local)` preset is a reusable app-side routing profile, not a raw `x-route42-mode` value.
 
 ## DNS Modes
 
@@ -126,6 +136,18 @@ Default DNS mode if `x-route42-dns` is omitted:
 | `direct` | `local` |
 | `proxy` | `proxy` |
 | `rule` | `split` |
+
+## Shared Routing Profiles And Presets
+
+Imported links do not store routing inline forever.
+
+Current app behavior:
+
+- one saved connection points at one routing profile;
+- one routing profile can be reused by several saved VPS connections;
+- imported `x-route42-*` rules are stored as imported rules inside that routing profile;
+- the built-in `Rule (RU + Local)` preset can be created in the app and assigned to several connections;
+- the preset layer is shown separately from editable imported and custom rules.
 
 ## Rule Parameters
 
@@ -232,16 +254,18 @@ Current import order inside the saved profile is:
 
 Within one parameter family, repeated values keep their original order.
 
+All rules imported from `x-route42-*` parameters are tagged as `Imported` in the UI. Rules created later from the `Routes` screen are tagged as `Custom`.
+
 ## Priority And Overrides
 
 The generated route list puts built-in safety rules before imported custom rules.
 
 In practice this means:
 
-- private networks keep direct priority;
-- `lan`, `local`, and `home.arpa` keep direct priority;
-- `.ru` and `.rf` keep direct priority in `rule` mode;
-- imported custom rules mainly override the final fallback route, not those built-in exclusions.
+- local and special-use networks keep direct priority;
+- `localhost`, `lan`, `local`, and `home.arpa` keep direct priority;
+- if the routing profile uses `Rule (RU + Local)`, its built-in direct rules are evaluated before imported and manual rules;
+- imported and manual custom rules mainly override the final fallback route, not those built-in exclusions.
 
 ## What Gets Added Automatically By The App
 
@@ -251,15 +275,16 @@ Always added:
 
 - DNS hijack on port `53`;
 - rejection of loopback DoT on `127.0.0.1:853` and `::1:853`;
-- direct routing for private IP ranges;
-- direct routing for `lan`, `local`, and `home.arpa`.
+- direct routing for local and special-use IP ranges such as RFC1918, CGNAT, link-local, multicast, and ULA space;
+- direct routing for `localhost`, `lan`, `local`, and `home.arpa`.
 
-Added only in `rule` mode:
+Added only when the assigned routing profile uses `Rule (RU + Local)`:
 
-- direct routing for `.ru`;
-- direct routing for `.rf`.
+- direct routing for `.ru`, `.su`, `xn--p1ai`, `xn--d1acj3b`, `xn--80adxhks`, and `xn--p1acf`;
+- direct routing for the bundled domestic direct domains such as `yandex.ru`, `vk.com`, `mail.ru`, `rutube.ru`, `wildberries.ru`, and `ozon.ru`;
+- direct `geoip-ru` matching through a local binary sing-box `rule_set`.
 
-This means you do not need to duplicate those defaults in every link.
+This means you do not need to duplicate local safety rules in every link, and you can move several VPS profiles onto one shared `RU + Local` preset instead of copy-pasting those domains by hand.
 
 ## DNS Matching Nuance
 
@@ -276,8 +301,11 @@ After the link is saved, the routing data becomes editable in the app:
 
 - `Mode` can be changed on the profile screen;
 - `DNS` mode can be changed on the profile screen;
+- the connection can be moved onto another saved routing profile;
 - imported rules can be enabled, disabled, edited, or deleted on the `Routes` screen;
-- new direct, proxy, and block rules can be added manually.
+- new direct, proxy, and block rules can be added manually;
+- manually added rules are tagged as `Custom`;
+- preset rules are shown as a read-only built-in summary and are not edited as raw rows.
 
 The app edits the normalized internal profile, not the raw URL text.
 
@@ -302,11 +330,12 @@ What this does:
 
 - the tunnel uses the imported Reality transport settings;
 - final routing stays proxy because mode is `rule`;
-- `.ru` and `.rf` domains automatically go direct;
 - explicitly listed bank and government hosts also go direct;
 - Telegram API and Google video traffic go through the proxy;
 - `doubleclick.net` is blocked;
 - local names and private networks stay direct.
+
+If you later switch this connection to the built-in `Rule (RU + Local)` preset, the RU suffix bundle, domestic direct bundle, and `geoip-ru` rule-set are added on top of those imported rules.
 
 ## Recommended Example: Everything Through Proxy
 

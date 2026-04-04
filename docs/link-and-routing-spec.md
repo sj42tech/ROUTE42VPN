@@ -8,10 +8,10 @@ For the detailed user-facing guide, see [import-link-routing-guide.md](import-li
 
 The import link is only the transport envelope. After parsing, the app stores a normalized profile with:
 
-- endpoint settings;
-- routing mode;
-- DNS mode;
-- editable routing rules;
+- endpoint settings in `ConnectionProfile`;
+- a routing profile reference from the connection;
+- routing mode and DNS mode in `RoutingProfile`;
+- editable routing rules with rule provenance;
 - preserved unknown query parameters as saved metadata.
 
 ## Standard VLESS Fields
@@ -56,6 +56,15 @@ Normalized endpoint model:
   "displayName": "edge-profile"
 }
 ```
+
+If the link uses `security=reality`, the current parser requires:
+
+- `sni`
+- `fp`
+- `pbk`
+- `sid`
+
+If any of them is missing, import fails before the profile can be saved.
 
 ## Preserved Unknown Parameters
 
@@ -113,6 +122,22 @@ Custom keys use the `x-route42-` prefix.
 
 These names are reserved, but they are not applied to routing behavior in the current build.
 
+## Built-In Presets
+
+Built-in routing presets are app-side routing profiles, not extra `x-route42-*` keys in the raw link.
+
+Current built-in preset:
+
+- `Rule (RU + Local)`
+
+That preset adds:
+
+- local and special-use direct CIDRs;
+- `localhost`, `.local`, and `.home.arpa` direct handling;
+- RU-oriented direct suffixes;
+- curated domestic direct domains;
+- `geoip-ru` through a local binary sing-box `rule_set`.
+
 ## Example With Routing Parameters
 
 ```text
@@ -126,7 +151,7 @@ ConnectionProfile
 - id
 - name
 - endpoint: EndpointConfig
-- routing: RoutingProfile
+- routingProfileId
 - importedShareLink: ImportedShareLink?
 
 EndpointConfig
@@ -146,6 +171,9 @@ EndpointConfig
 - extraQueryParameters
 
 RoutingProfile
+- id
+- name
+- preset
 - mode
 - dnsMode
 - rules: List<RoutingRule>
@@ -155,6 +183,7 @@ RoutingRule
 - action
 - matchType
 - value
+- source
 - enabled
 
 ImportedShareLink
@@ -165,7 +194,21 @@ ImportedShareLink
 ## Import Rules
 
 1. Standard VLESS fields map to `EndpointConfig`.
-2. `x-route42-*` routing keys map to `RoutingProfile`.
-3. Unknown non-routing keys are preserved as saved metadata.
-4. Missing routing parameters default to `RoutingMode.PROXY`.
-5. After saving, the UI edits the normalized profile model, not the raw URL.
+2. If `security=reality`, `sni`, `fp`, `pbk`, and `sid` are required.
+3. `x-route42-*` routing keys map to `RoutingRule` entries inside `RoutingProfile`.
+4. Rules imported from `x-route42-*` are saved with `source=IMPORTED`.
+5. Rules added later in the UI are saved with `source=USER`.
+6. Built-in presets are assigned in the app and are not encoded in the raw import link.
+7. Unknown non-routing keys are preserved as saved metadata.
+8. Missing routing parameters default to `RoutingMode.PROXY`.
+9. After saving, the UI edits the normalized connection/routing models, not the raw URL.
+
+## Runtime Layering
+
+At config generation time the runtime rule layers are:
+
+1. built-in safety rules
+2. built-in preset rules, if a preset is assigned
+3. imported rules from the link
+4. manual user rules
+5. final outbound fallback from routing mode

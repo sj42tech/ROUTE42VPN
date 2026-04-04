@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import io.github.sj42tech.route42.model.MatchType
 import io.github.sj42tech.route42.model.RoutingAction
 import io.github.sj42tech.route42.model.RoutingRule
+import io.github.sj42tech.route42.model.RoutingRuleSource
 import io.github.sj42tech.route42.model.label
 
 @Composable
@@ -45,7 +46,7 @@ internal fun RuleEditorCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Rule",
+                    text = if (rule.source == RoutingRuleSource.IMPORTED) "Imported Rule" else "Rule",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -54,6 +55,14 @@ internal fun RuleEditorCard(
                     onCheckedChange = { onUpdate(rule.copy(enabled = it)) },
                 )
             }
+            Spacer(modifier = Modifier.height(12.dp))
+            InfoChipRow(
+                labels = listOf(
+                    rule.source.label(),
+                    rule.action.label(),
+                    rule.matchType.label(),
+                ),
+            )
             Spacer(modifier = Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 EnumDropdown(

@@ -7,6 +7,7 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.content.pm.ApplicationInfo
 import androidx.core.content.getSystemService
+import io.github.sj42tech.route42.config.RoutingPresetRuleSetFiles
 import io.github.sj42tech.route42.tunnel.TunnelRuntime
 import io.nekohasekai.libbox.Libbox
 import io.nekohasekai.libbox.SetupOptions
@@ -29,6 +30,7 @@ class Route42Application : Application() {
             val baseDir = File(filesDir, "libbox/base").apply { mkdirs() }
             val workingDir = File(filesDir, "libbox/work").apply { mkdirs() }
             val tempDir = File(cacheDir, "libbox").apply { mkdirs() }
+            syncBundledRuleSets(baseDir)
 
             Libbox.setLocale(Locale.getDefault().toLanguageTag().replace("-", "_"))
             Libbox.setup(
@@ -49,6 +51,19 @@ class Route42Application : Application() {
             }
         }.onFailure {
             TunnelRuntime.setError("libbox init failed: ${it.message}")
+        }
+    }
+
+    private fun syncBundledRuleSets(baseDir: File) {
+        val ruleSetDir = File(baseDir, "rule-set").apply { mkdirs() }
+        val geoipRuFile = File(ruleSetDir, "geoip-ru.srs")
+        assets.open("rule-set/geoip-ru.srs").use { input ->
+            geoipRuFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        RoutingPresetRuleSetFiles.ruGeoipRuleSetPathProvider = {
+            geoipRuFile.takeIf(File::isFile)?.path
         }
     }
 

@@ -25,6 +25,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.RoutingMode
+import io.github.sj42tech.route42.model.RoutingProfile
+import io.github.sj42tech.route42.model.RoutingPreset
 import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.tunnel.TunnelRuntime
 import io.github.sj42tech.route42.tunnel.TunnelStatus
@@ -38,9 +40,12 @@ import io.github.sj42tech.route42.ui.components.TunnelStatusCard
 @Composable
 internal fun ProfileDetailScreen(
     profile: ConnectionProfile,
+    routingProfile: RoutingProfile,
+    routingUsageCount: Int,
     onBack: () -> Unit,
     onModeSelected: (RoutingMode) -> Unit,
     onDnsSelected: (DnsMode) -> Unit,
+    onManageRoutingProfile: () -> Unit,
     onOpenRoutes: () -> Unit,
 ) {
     val tunnelState = TunnelRuntime.state.collectAsStateWithLifecycle().value
@@ -57,7 +62,7 @@ internal fun ProfileDetailScreen(
         if (isRunningForProfile) {
             TunnelServiceController.stop(context)
         } else {
-            requestConnect(profile)
+            requestConnect(profile, routingProfile)
         }
     }
 
@@ -119,10 +124,41 @@ internal fun ProfileDetailScreen(
                             fontWeight = FontWeight.SemiBold,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "Routing profile: ${routingProfile.name}")
+                        if (routingProfile.preset != RoutingPreset.NONE) {
+                            Text(
+                                text = "Preset: ${routingProfile.preset.label()}",
+                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        Text(
+                            text = if (routingUsageCount == 1) {
+                                "Used only by this connection."
+                            } else {
+                                "Shared with $routingUsageCount connections."
+                            },
+                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                        )
+                        if (routingUsageCount > 1) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Mode, DNS, and route edits below affect every connection that uses this routing profile.",
+                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                                color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            onClick = onManageRoutingProfile,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text("Choose Routing Profile")
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
                         OptionSelector(
                             title = "Mode",
                             values = RoutingMode.entries,
-                            selected = profile.routing.mode,
+                            selected = routingProfile.mode,
                             label = RoutingMode::label,
                             onSelected = onModeSelected,
                         )
@@ -130,7 +166,7 @@ internal fun ProfileDetailScreen(
                         OptionSelector(
                             title = "DNS",
                             values = DnsMode.entries,
-                            selected = profile.routing.dnsMode,
+                            selected = routingProfile.dnsMode,
                             label = DnsMode::label,
                             onSelected = onDnsSelected,
                         )
@@ -139,7 +175,7 @@ internal fun ProfileDetailScreen(
                             onClick = onOpenRoutes,
                             modifier = Modifier.fillMaxWidth(),
                         ) {
-                            Text("Edit Routes (${profile.routing.rules.size})")
+                            Text("Edit Routes (${routingProfile.rules.size})")
                         }
                     }
                 }

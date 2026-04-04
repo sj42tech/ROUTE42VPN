@@ -1,6 +1,8 @@
 package io.github.sj42tech.route42.config
 
 import io.github.sj42tech.route42.model.ConnectionProfile
+import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
+import io.github.sj42tech.route42.model.RoutingProfile
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -17,15 +19,18 @@ object SingBoxConfigGenerator {
         prettyPrintIndent = "  "
     }
 
-    fun generate(profile: ConnectionProfile): String {
+    fun generate(profile: ConnectionProfileWithRouting): String =
+        generate(profile.profile, profile.routingProfile)
+
+    fun generate(profile: ConnectionProfile, routingProfile: RoutingProfile): String {
         val config = buildJsonObject {
             put("log", buildJsonObject {
                 put("level", "info")
             })
-            put("dns", buildDnsConfig(profile))
+            put("dns", buildDnsConfig(profile, routingProfile))
             put("inbounds", buildInbounds(profile))
             put("outbounds", buildOutbounds(profile))
-            put("route", buildRouteConfig(profile))
+            put("route", buildRouteConfig(profile, routingProfile))
         }
 
         return JsonFormatter.encodeToString(JsonObject.serializer(), config)

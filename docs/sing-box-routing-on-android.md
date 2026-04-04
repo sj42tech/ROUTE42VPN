@@ -11,7 +11,14 @@ Common routing use cases:
 - keep some domains or IP ranges outside the tunnel
 - combine a self-hosted VPS with rule-based Android traffic control
 
-Route42 stores routing as app-level profile data and generates a compatible runtime config for the tunnel. This keeps the UI easier to work with than hand-editing large sing-box config files on a phone.
+Route42 stores routing as reusable app-level profile data and generates a compatible runtime config for the tunnel. This keeps the UI easier to work with than hand-editing large sing-box config files on a phone.
+
+Current routing model:
+
+- one `ConnectionProfile` stores the VPS endpoint and transport settings;
+- one `RoutingProfile` stores routing mode, DNS mode, imported rules, and manual rules;
+- one routing profile can be reused by several saved VPS profiles;
+- the built-in `Rule (RU + Local)` preset adds local safety rules, RU-oriented suffix defaults, curated domestic direct domains, and `geoip-ru` through a local sing-box `rule_set`.
 
 For the exact parameter model and examples, see:
 

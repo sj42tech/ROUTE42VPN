@@ -36,6 +36,7 @@ import io.github.sj42tech.route42.model.ProfilesSnapshot
 import io.github.sj42tech.route42.model.ThemeMode
 import io.github.sj42tech.route42.model.isDarkTheme
 import io.github.sj42tech.route42.model.label
+import io.github.sj42tech.route42.model.routingProfileFor
 import io.github.sj42tech.route42.tunnel.TunnelRuntime
 import io.github.sj42tech.route42.tunnel.TunnelStatus
 import io.github.sj42tech.route42.tunnel.TunnelServiceController
@@ -113,6 +114,7 @@ internal fun ProfilesScreen(
                     }
                 }
                 items(snapshot.profiles, key = ConnectionProfile::id) { profile ->
+                    val routingProfile = snapshot.routingProfileFor(profile)
                     val isBusy = tunnelState.status in setOf(
                         TunnelStatus.STARTING,
                         TunnelStatus.STOPPING,
@@ -162,7 +164,7 @@ internal fun ProfilesScreen(
                                     enabled = !isBusy,
                                     onCheckedChange = { shouldConnect ->
                                         if (shouldConnect) {
-                                            requestConnect(profile)
+                                            requestConnect(profile, routingProfile)
                                         } else if (isProfileActive) {
                                             TunnelServiceController.stop(context)
                                         }
@@ -172,9 +174,9 @@ internal fun ProfilesScreen(
                             Spacer(modifier = Modifier.height(10.dp))
                             InfoChipRow(
                                 labels = listOf(
-                                    profile.routing.mode.label(),
-                                    profile.routing.dnsMode.label(),
-                                    "${profile.routing.rules.size} rules",
+                                    routingProfile.mode.label(),
+                                    routingProfile.dnsMode.label(),
+                                    "${routingProfile.rules.size} rules",
                                 ),
                             )
                         }

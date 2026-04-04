@@ -1,5 +1,6 @@
 package io.github.sj42tech.route42.ui.screens
 
+import io.github.sj42tech.route42.config.builtInPresetSummaryLines
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,13 +21,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.RoutingAction
+import io.github.sj42tech.route42.model.RoutingProfile
+import io.github.sj42tech.route42.model.RoutingPreset
 import io.github.sj42tech.route42.model.RoutingRule
+import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.ui.components.RuleEditorCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun RoutingEditorScreen(
     profile: ConnectionProfile,
+    routingProfile: RoutingProfile,
+    routingUsageCount: Int,
     onBack: () -> Unit,
     onAddRule: (RoutingAction) -> Unit,
     onUpdateRule: (RoutingRule) -> Unit,
@@ -55,6 +61,61 @@ internal fun RoutingEditorScreen(
                 OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                     androidx.compose.foundation.layout.Column(modifier = Modifier.padding(16.dp)) {
                         Text(
+                            text = routingProfile.name,
+                            style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 8.dp))
+                        if (routingProfile.preset != RoutingPreset.NONE) {
+                            Text(
+                                text = "Preset: ${routingProfile.preset.label()}",
+                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                            )
+                            androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 4.dp))
+                            Text(
+                                text = "Built-in preset rules are applied before the custom rules below.",
+                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                            )
+                            androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 8.dp))
+                        }
+                        Text(text = "Editing routes for ${profile.name}.")
+                        Text(
+                            text = if (routingUsageCount == 1) {
+                                "This routing profile is used only by this connection."
+                            } else {
+                                "This routing profile is shared by $routingUsageCount connections, so route edits here apply to all of them."
+                            },
+                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            }
+            if (routingProfile.preset != RoutingPreset.NONE) {
+                item {
+                    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                        androidx.compose.foundation.layout.Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text(
+                                text = "Built-in Preset Rules",
+                                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            builtInPresetSummaryLines(routingProfile).forEach { line ->
+                                Text(
+                                    text = line,
+                                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            item {
+                OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                    androidx.compose.foundation.layout.Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
                             text = "Quick Add",
                             style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
@@ -76,7 +137,7 @@ internal fun RoutingEditorScreen(
                 }
             }
 
-            if (profile.routing.rules.isEmpty()) {
+            if (routingProfile.rules.isEmpty()) {
                 item {
                     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                         Text(
@@ -87,7 +148,7 @@ internal fun RoutingEditorScreen(
                 }
             }
 
-            items(profile.routing.rules, key = RoutingRule::id) { rule ->
+            items(routingProfile.rules, key = RoutingRule::id) { rule ->
                 RuleEditorCard(
                     rule = rule,
                     onUpdate = onUpdateRule,

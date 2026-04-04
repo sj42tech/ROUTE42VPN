@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.sj42tech.route42.config.SingBoxConfigGenerator
 import io.github.sj42tech.route42.model.ConnectionProfile
+import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
 import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.parser.VlessLinkParser
 import io.github.sj42tech.route42.ui.endpointConnectionSummary
@@ -36,7 +37,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun ImportLinkScreen(
     onBack: () -> Unit,
-    onSave: suspend (ConnectionProfile) -> Unit,
+    onSave: suspend (ConnectionProfileWithRouting) -> Unit,
 ) {
     var linkText by rememberSaveable { mutableStateOf("") }
     val parseResult = remember(linkText) {
@@ -130,7 +131,7 @@ internal fun ImportLinkScreen(
 }
 
 @Composable
-private fun ImportPreviewCard(profile: ConnectionProfile) {
+private fun ImportPreviewCard(profile: ConnectionProfileWithRouting) {
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
         androidx.compose.foundation.layout.Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -139,10 +140,10 @@ private fun ImportPreviewCard(profile: ConnectionProfile) {
                 fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
             )
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 12.dp))
-            Text(text = "Name: ${profile.name}")
-            Text(text = "Connection type: ${endpointConnectionSummary(profile.endpoint)}")
-            Text(text = "Mode: ${profile.routing.mode.label()}")
-            Text(text = "DNS: ${profile.routing.dnsMode.label()}")
+            Text(text = "Name: ${profile.profile.name}")
+            Text(text = "Connection type: ${endpointConnectionSummary(profile.profile.endpoint)}")
+            Text(text = "Mode: ${profile.routingProfile.mode.label()}")
+            Text(text = "DNS: ${profile.routingProfile.dnsMode.label()}")
             Text(
                 text = "Sensitive endpoint details are hidden until the profile is saved.",
                 style = MaterialTheme.typography.bodySmall,
@@ -150,11 +151,11 @@ private fun ImportPreviewCard(profile: ConnectionProfile) {
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 10.dp))
             InfoChipRow(
                 labels = buildList {
-                    add(profile.endpoint.protocol.name)
-                    add(profile.endpoint.network.uppercase())
-                    profile.endpoint.security?.let { add(it.replaceFirstChar(Char::uppercase)) }
-                    profile.endpoint.flow?.let(::add)
-                    add("${profile.routing.rules.size} imported routes")
+                    add(profile.profile.endpoint.protocol.name)
+                    add(profile.profile.endpoint.network.uppercase())
+                    profile.profile.endpoint.security?.let { add(it.replaceFirstChar(Char::uppercase)) }
+                    profile.profile.endpoint.flow?.let(::add)
+                    add("${profile.routingProfile.rules.size} imported routes")
                 },
             )
         }

@@ -1,12 +1,14 @@
 package io.github.sj42tech.route42
 
 import io.github.sj42tech.route42.model.ConnectionProfile
+import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
 import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.EndpointConfig
 import io.github.sj42tech.route42.model.MatchType
 import io.github.sj42tech.route42.model.RoutingAction
 import io.github.sj42tech.route42.model.RoutingMode
 import io.github.sj42tech.route42.model.RoutingProfile
+import io.github.sj42tech.route42.model.RoutingPreset
 import io.github.sj42tech.route42.model.RoutingRule
 
 object TestFixtures {
@@ -24,6 +26,38 @@ object TestFixtures {
             "fp=chrome&pbk=$PublicKey&sid=$ShortId&spx=%2F&type=tcp#$ProfileName"
 
     fun sampleProfile(
+        endpoint: EndpointConfig = sampleEndpoint(),
+    ): ConnectionProfile = ConnectionProfile(
+        name = ProfileName,
+        endpoint = endpoint,
+    )
+
+    fun sampleRoutingProfile(
+        preset: RoutingPreset = RoutingPreset.NONE,
+        routingMode: RoutingMode = RoutingMode.RULE,
+        dnsMode: DnsMode = DnsMode.SPLIT,
+        rules: List<RoutingRule> = listOf(
+            RoutingRule(
+                action = RoutingAction.DIRECT,
+                matchType = MatchType.DOMAIN,
+                value = "portal.example",
+            ),
+            RoutingRule(
+                action = RoutingAction.PROXY,
+                matchType = MatchType.DOMAIN,
+                value = "tunnel.example",
+            ),
+        ),
+    ): RoutingProfile = RoutingProfile(
+        name = "$ProfileName routing",
+        preset = preset,
+        mode = routingMode,
+        dnsMode = dnsMode,
+        rules = rules,
+    )
+
+    fun sampleResolvedProfile(
+        preset: RoutingPreset = RoutingPreset.NONE,
         routingMode: RoutingMode = RoutingMode.RULE,
         dnsMode: DnsMode = DnsMode.SPLIT,
         endpoint: EndpointConfig = sampleEndpoint(),
@@ -39,15 +73,18 @@ object TestFixtures {
                 value = "tunnel.example",
             ),
         ),
-    ): ConnectionProfile = ConnectionProfile(
-        name = ProfileName,
-        endpoint = endpoint,
-        routing = RoutingProfile(
-            mode = routingMode,
-            dnsMode = dnsMode,
-            rules = rules,
-        ),
-    )
+    ): ConnectionProfileWithRouting {
+        val profile = sampleProfile(endpoint = endpoint)
+        return ConnectionProfileWithRouting(
+            profile = profile,
+            routingProfile = sampleRoutingProfile(
+                preset = preset,
+                routingMode = routingMode,
+                dnsMode = dnsMode,
+                rules = rules,
+            ).copy(id = profile.routingProfileId),
+        )
+    }
 
     fun sampleEndpoint(
         network: String = "tcp",

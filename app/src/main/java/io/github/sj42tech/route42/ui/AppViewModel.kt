@@ -7,12 +7,15 @@ import androidx.lifecycle.viewModelScope
 import io.github.sj42tech.route42.data.ProfilesRepository
 import io.github.sj42tech.route42.data.ProfilesRecoveryNotice
 import io.github.sj42tech.route42.model.ConnectionProfile
+import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
 import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.MatchType
 import io.github.sj42tech.route42.model.ProfilesSnapshot
 import io.github.sj42tech.route42.model.RoutingAction
 import io.github.sj42tech.route42.model.RoutingMode
+import io.github.sj42tech.route42.model.RoutingPreset
 import io.github.sj42tech.route42.model.RoutingRule
+import io.github.sj42tech.route42.model.RoutingRuleSource
 import io.github.sj42tech.route42.model.ThemeMode
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -32,7 +35,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         initialValue = null,
     )
 
-    suspend fun upsertProfile(profile: ConnectionProfile): String = repository.upsertProfile(profile)
+    suspend fun upsertProfile(profile: ConnectionProfileWithRouting): String = repository.upsertProfile(profile)
 
     fun dismissStorageRecoveryNotice() {
         ProfilesRecoveryNotice.dismiss()
@@ -47,6 +50,24 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun setRoutingMode(profileId: String, mode: RoutingMode) {
         viewModelScope.launch {
             repository.setRoutingMode(profileId, mode)
+        }
+    }
+
+    fun assignRoutingProfile(profileId: String, routingProfileId: String) {
+        viewModelScope.launch {
+            repository.assignRoutingProfile(profileId, routingProfileId)
+        }
+    }
+
+    fun duplicateRoutingProfile(profileId: String) {
+        viewModelScope.launch {
+            repository.duplicateRoutingProfile(profileId)
+        }
+    }
+
+    fun createPresetRoutingProfile(profileId: String, preset: RoutingPreset) {
+        viewModelScope.launch {
+            repository.createPresetRoutingProfile(profileId, preset)
         }
     }
 
@@ -69,6 +90,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     action = action,
                     matchType = matchType,
                     value = value,
+                    source = RoutingRuleSource.USER,
                 ),
             )
         }

@@ -2,7 +2,7 @@
 
 Route42 is an Android VLESS client for self-hosted VPN and sing-box-compatible profiles.
 
-It lets you import `vless://` links, connect through Android `VpnService`, and manage custom routing rules for direct, proxy, and split traffic. Route42 is designed for users who run their own VPS or already have sing-box-compatible access profiles and want a simple Android client with configurable routing behavior.
+It lets you import `vless://` links, connect through Android `VpnService`, and manage reusable routing profiles for direct, proxy, and split traffic. Route42 is designed for users who run their own VPS or already have sing-box-compatible access profiles and want a simple Android client with configurable routing behavior.
 
 ## Contact And VPS Setup
 
@@ -56,10 +56,20 @@ This applies to:
 - local and generated files;
 - anonymization rules and the ban on personal data in the repo.
 
+## Live Tunnel Safety
+
+- Do not stop, restart, unload, or disable `local.xray` while a working desktop tunnel is active unless the user gives an explicit instruction to do that.
+- Do not disable macOS system proxy settings while the live desktop tunnel is considered working unless the user explicitly requests that action.
+- Provider and path diagnostics should be run as direct no-proxy checks that bypass the current tunnel while leaving the active `xray` session untouched.
+- For direct provider checks from the laptop without touching the live tunnel, use `/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/diagnose-direct-provider-path.sh`.
+
 ## Project At A Glance
 
 - imports standard `vless://` links;
+- strictly validates `Reality` transport links before save;
 - supports Route42 routing parameters on top of imported profiles;
+- separates connection profiles from reusable routing profiles;
+- includes a built-in `Rule (RU + Local)` preset with local safety rules and RU direct-routing defaults;
 - generates `sing-box` config from internal models instead of editing raw config by hand;
 - supports `direct`, `proxy`, and `rule` routing modes;
 - runs the VPN tunnel through Android `VpnService`.
@@ -74,6 +84,16 @@ This applies to:
 - [docs/android-vless-client-overview.md](docs/android-vless-client-overview.md)
 - [docs/github-release-signing.md](docs/github-release-signing.md)
 - [docs/vps-audit-2026-03-22.md](docs/vps-audit-2026-03-22.md)
+- [docs/vps-provider-price-tracker-2026-03-28.md](docs/vps-provider-price-tracker-2026-03-28.md)
+- [docs/hostkey-like-vps-shortlist-2026-04-04.md](docs/hostkey-like-vps-shortlist-2026-04-04.md)
+- [docs/provider-direct-reachability-2026-03-28.md](docs/provider-direct-reachability-2026-03-28.md)
+- [docs/aws-lightsail-onboarding.md](docs/aws-lightsail-onboarding.md)
+- [docs/xray-fleet-version-policy-2026-03-28.md](docs/xray-fleet-version-policy-2026-03-28.md)
+- [docs/vpn-path-degradation-2026-03-27-to-2026-03-28.md](docs/vpn-path-degradation-2026-03-27-to-2026-03-28.md)
+- [docs/mikrotik-v6-wan-duplex-fix-2026-04-03.md](docs/mikrotik-v6-wan-duplex-fix-2026-04-03.md)
+- [docs/mikrotik-v7-mobile-hotspot-lab-2026-03-29.md](docs/mikrotik-v7-mobile-hotspot-lab-2026-03-29.md)
+- [docs/tele2-domain-matrix-2026-03-29.md](docs/tele2-domain-matrix-2026-03-29.md)
+- [docs/dpi-lab.md](docs/dpi-lab.md)
 - [docs/vultr-zero-cost-exit.md](docs/vultr-zero-cost-exit.md)
 - [docs/exoscale-vps-onboarding.md](docs/exoscale-vps-onboarding.md)
 - [docs/uhost-vps-onboarding.md](docs/uhost-vps-onboarding.md)
@@ -83,6 +103,7 @@ This applies to:
 - [docs/self-hosted-vpn-android-guide.md](docs/self-hosted-vpn-android-guide.md)
 - [docs/import-link-routing-guide.md](docs/import-link-routing-guide.md)
 - [docs/link-and-routing-spec.md](docs/link-and-routing-spec.md)
+- [docs/route42-team-vps-and-routing-brief-2026-04-04.md](docs/route42-team-vps-and-routing-brief-2026-04-04.md)
 - [docs/mvp-config.md](docs/mvp-config.md)
 - [DONATE.md](DONATE.md)
 

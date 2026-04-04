@@ -4,60 +4,32 @@ import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.MatchType
 import io.github.sj42tech.route42.model.RoutingAction
 import io.github.sj42tech.route42.model.RoutingMode
+import io.github.sj42tech.route42.model.RoutingProfile
 import io.github.sj42tech.route42.model.RoutingRule
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-internal fun buildRouteConfig(profile: ConnectionProfile): JsonObject = buildJsonObject {
+@Suppress("UNUSED_PARAMETER")
+internal fun buildRouteConfig(profile: ConnectionProfile, routingProfile: RoutingProfile): JsonObject = buildJsonObject {
     put(
         "final",
-        when (profile.routing.mode) {
+        when (routingProfile.mode) {
             RoutingMode.DIRECT -> "direct"
             RoutingMode.PROXY -> "proxy"
             RoutingMode.RULE -> "proxy"
         },
     )
+    val builtInRuleSets = builtInRouteRuleSets(routingProfile)
+    if (builtInRuleSets.isNotEmpty()) {
+        put("rule_set", buildJsonArray {
+            builtInRuleSets.forEach(::add)
+        })
+    }
     put("rules", buildJsonArray {
-        add(
-            buildJsonObject {
-                put("port", 53)
-                put("action", "hijack-dns")
-            },
-        )
-        add(
-            buildJsonObject {
-                put("port", 853)
-                put("ip_cidr", jsonArrayOf("127.0.0.0/8", "::1/128"))
-                put("action", "reject")
-                put("method", "default")
-            },
-        )
-        add(
-            buildJsonObject {
-                put("ip_is_private", true)
-                put("action", "route")
-                put("outbound", "direct")
-            },
-        )
-        add(
-            buildJsonObject {
-                put("domain_suffix", jsonArrayOf("lan", "local", "home.arpa"))
-                put("action", "route")
-                put("outbound", "direct")
-            },
-        )
-        if (profile.routing.mode == RoutingMode.RULE) {
-            add(
-                buildJsonObject {
-                    put("domain_suffix", jsonArrayOf("ru", "rf"))
-                    put("action", "route")
-                    put("outbound", "direct")
-                },
-            )
-        }
-        profile.routing.rules.filter(RoutingRule::enabled).forEach { rule ->
+        builtInRouteRules(routingProfile).forEach(::add)
+        routingProfile.rules.filter(RoutingRule::enabled).forEach { rule ->
             add(buildMatchRule(rule, "outbound", outboundTag(rule.action)))
         }
     })

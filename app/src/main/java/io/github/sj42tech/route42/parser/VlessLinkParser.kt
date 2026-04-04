@@ -1,6 +1,7 @@
 package io.github.sj42tech.route42.parser
 
 import io.github.sj42tech.route42.model.ConnectionProfile
+import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
 import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.EndpointConfig
 import io.github.sj42tech.route42.model.ImportedShareLink
@@ -9,6 +10,7 @@ import io.github.sj42tech.route42.model.RoutingAction
 import io.github.sj42tech.route42.model.RoutingMode
 import io.github.sj42tech.route42.model.RoutingProfile
 import io.github.sj42tech.route42.model.RoutingRule
+import io.github.sj42tech.route42.model.RoutingRuleSource
 import io.github.sj42tech.route42.model.defaultDnsMode
 import java.net.URI
 import java.net.URLDecoder
@@ -18,7 +20,7 @@ import java.util.UUID
 class LinkParseException(message: String) : IllegalArgumentException(message)
 
 object VlessLinkParser {
-    fun parse(rawLink: String): ConnectionProfile {
+    fun parse(rawLink: String): ConnectionProfileWithRouting {
         val normalizedLink = rawLink.trim()
         if (normalizedLink.isEmpty()) {
             throw LinkParseException("Link is empty")
@@ -67,19 +69,27 @@ object VlessLinkParser {
                 .orEmpty(),
             extraQueryParameters = endpointExtras,
         )
+        validateEndpoint(endpoint)
 
         val name = uri.rawFragment
             ?.takeIf(String::isNotBlank)
             ?.let(::decodeComponent)
             ?: server
 
-        return ConnectionProfile(
+        val profile = ConnectionProfile(
             name = name,
             endpoint = endpoint,
-            routing = parseRouting(queryParameters),
             importedShareLink = ImportedShareLink(
                 extraQueryParameters = endpointExtras,
                 preservedCustomParameters = preservedCustomParameters,
+            ),
+        )
+
+        return ConnectionProfileWithRouting(
+            profile = profile,
+            routingProfile = parseRouting(queryParameters).copy(
+                id = profile.routingProfileId,
+                name = "${profile.name} routing",
             ),
         )
     }
@@ -127,6 +137,7 @@ object VlessLinkParser {
                         action = action,
                         matchType = matchType,
                         value = value,
+                        source = RoutingRuleSource.IMPORTED,
                     ),
                 )
             }
@@ -171,6 +182,25 @@ object VlessLinkParser {
     private fun validateUuid(value: String) {
         runCatching { UUID.fromString(value) }.getOrElse {
             throw LinkParseException("Invalid VLESS UUID")
+        }
+    }
+
+    private fun validateEndpoint(endpoint: EndpointConfig) {
+        if (!endpoint.security.equals("reality", ignoreCase = true)) {
+            return
+        }
+
+        if (endpoint.serverName.isNullOrBlank()) {
+            throw LinkParseException("Reality link is missing SNI")
+        }
+        if (endpoint.fingerprint.isNullOrBlank()) {
+            throw LinkParseException("Reality link is missing fingerprint")
+        }
+        if (endpoint.publicKey.isNullOrBlank()) {
+            throw LinkParseException("Reality link is missing public key")
+        }
+        if (endpoint.shortId.isNullOrBlank()) {
+            throw LinkParseException("Reality link is missing short ID")
         }
     }
 }

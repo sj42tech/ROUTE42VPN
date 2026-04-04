@@ -5,13 +5,15 @@ import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.MatchType
 import io.github.sj42tech.route42.model.RoutingAction
 import io.github.sj42tech.route42.model.RoutingMode
+import io.github.sj42tech.route42.model.RoutingProfile
 import io.github.sj42tech.route42.model.RoutingRule
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-internal fun buildDnsConfig(profile: ConnectionProfile): JsonObject = buildJsonObject {
+@Suppress("UNUSED_PARAMETER")
+internal fun buildDnsConfig(profile: ConnectionProfile, routingProfile: RoutingProfile): JsonObject = buildJsonObject {
     put("servers", buildJsonArray {
         add(
             buildJsonObject {
@@ -32,24 +34,9 @@ internal fun buildDnsConfig(profile: ConnectionProfile): JsonObject = buildJsonO
     })
 
     put("rules", buildJsonArray {
-        add(
-            buildJsonObject {
-                put("domain_suffix", jsonArrayOf("lan", "local", "home.arpa"))
-                put("action", "route")
-                put("server", "direct-dns")
-            },
-        )
-        if (profile.routing.mode == RoutingMode.RULE) {
-            add(
-                buildJsonObject {
-                    put("domain_suffix", jsonArrayOf("ru", "rf"))
-                    put("action", "route")
-                    put("server", "direct-dns")
-                },
-            )
-        }
+        builtInDnsRules(routingProfile).forEach(::add)
 
-        profile.routing.rules
+        routingProfile.rules
             .filter(RoutingRule::enabled)
             .filter { it.matchType != MatchType.IP_CIDR }
             .forEach { rule ->
@@ -64,7 +51,7 @@ internal fun buildDnsConfig(profile: ConnectionProfile): JsonObject = buildJsonO
 
     put(
         "final",
-        when (profile.routing.dnsMode) {
+        when (routingProfile.dnsMode) {
             DnsMode.LOCAL -> "direct-dns"
             DnsMode.PROXY -> "proxy-dns"
             DnsMode.SPLIT -> "proxy-dns"

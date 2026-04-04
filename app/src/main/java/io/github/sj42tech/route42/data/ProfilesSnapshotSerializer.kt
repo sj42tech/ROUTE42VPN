@@ -3,6 +3,7 @@ package io.github.sj42tech.route42.data
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import io.github.sj42tech.route42.model.ProfilesSnapshot
+import io.github.sj42tech.route42.model.migrated
 import java.io.InputStream
 import java.io.OutputStream
 import kotlinx.serialization.json.Json
@@ -36,7 +37,7 @@ object ProfilesSnapshotSerializer : Serializer<ProfilesSnapshot> {
             ProfilesJson.decodeFromString(
                 deserializer = ProfilesSnapshot.serializer(),
                 string = decodedBytes.decodeToString(),
-            )
+            ).migrated()
         } catch (error: Exception) {
             throw CorruptionException(
                 "Route42 could not parse the saved profile store. Clear app data and import your profiles again.",
