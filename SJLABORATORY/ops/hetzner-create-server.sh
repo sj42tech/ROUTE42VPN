@@ -202,5 +202,5 @@ Created Hetzner server:
 
 Next:
   ssh root@$SERVER_IP
-  /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/migrate-xray-from-old-vps.sh root@$SERVER_IP
+  /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/SJLABORATORY/ops/migrate-xray-from-old-vps.sh root@$SERVER_IP
 EOF

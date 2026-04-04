@@ -1,0 +1,57 @@
+# category|domain|note
+global|google.com|main Google web entry
+global|www.youtube.com|YouTube web shell
+global|m.youtube.com|YouTube mobile web shell
+global|youtubei.googleapis.com|YouTube client API endpoint family
+global|i.ytimg.com|YouTube image/static asset host
+global|s.ytimg.com|YouTube static asset host
+global|googlevideo.com|YouTube media delivery family
+global|redirector.googlevideo.com|YouTube media redirector family
+global|www.github.com|GitHub web
+global|www.cloudflare.com|Cloudflare public site
+global|www.wikipedia.org|Wikipedia web
+global|www.microsoft.com|Microsoft public site
+global|www.apple.com|Apple web
+global|apps.apple.com|App Store web
+global|www.samsung.com|Samsung web
+global|play.google.com|Google Play web
+global|www.amazon.com|Amazon web
+global|www.openai.com|OpenAI web
+messaging|telegram.org|Telegram public site
+messaging|web.telegram.org|Telegram web client
+messaging|api.telegram.org|Telegram API host
+ru_portal|ya.ru|Yandex short portal
+ru_portal|yandex.ru|Yandex main portal
+ru_portal|vk.com|VK portal
+ru_portal|mail.ru|Mail.ru portal
+ru_portal|ok.ru|OK portal
+ru_portal|dzen.ru|Dzen portal
+ru_media|rutube.ru|Rutube media
+ru_media|ria.ru|RIA news
+ru_media|lenta.ru|Lenta news
+ru_media|www.rbc.ru|RBC media
+ru_media|www.kommersant.ru|Kommersant media
+ru_commerce|www.ozon.ru|Ozon commerce
+ru_commerce|www.wildberries.ru|Wildberries commerce
+ru_commerce|www.avito.ru|Avito commerce
+ru_gov|www.gosuslugi.ru|Gosuslugi
+ru_gov|www.nalog.gov.ru|Nalog
+ru_gov|www.mos.ru|Moscow services
+ru_bank|www.sberbank.ru|Sber
+ru_bank|www.tbank.ru|T-Bank
+ru_bank|alfabank.ru|Alfa Bank
+ru_bank|www.vtb.ru|VTB
+provider_site|hostkey.com|Hostkey provider site
+provider_site|exoscale.com|Exoscale provider site
+provider_site|hetzner.com|Hetzner provider site
+provider_site|www.ovhcloud.com|OVHcloud provider site
+provider_site|www.scaleway.com|Scaleway provider site
+provider_site|aws.amazon.com|AWS provider site
+provider_site|www.tencentcloud.com|Tencent Cloud provider site
+provider_site|www.alibabacloud.com|Alibaba Cloud provider site
+provider_site|www.time4vps.com|Time4VPS provider site
+provider_site|www.rackcorp.mn|RackCorp Mongolia site
+provider_site|u1host.com|U1HOST site
+provider_site|cloud.mn|Cloud.mn site
+provider_site|mcloud.mn|mCloud site
+provider_site|www.vultr.com|Vultr site

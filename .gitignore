@@ -23,4 +23,7 @@
 /ROUTE42/captures/
 /ROUTE42/*.apk
 /ROUTE42/branding/variant-*.png
+/ROUTE42/secrets/
+/SJLABORATORY/secrets/
+/SJLABORATORY/logs/
 /secrets/

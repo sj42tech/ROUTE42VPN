@@ -40,7 +40,7 @@ Reach an effective `$0` Vultr state for this experiment:
 
 1. Confirm the laptop is already back on the baseline tunnel:
    - `secrets/PROXY/xray/config.json` should point to `5.39.219.74`
-   - `/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/rollback-to-baseline.sh` should complete successfully
+   - `/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/SJLABORATORY/ops/rollback-to-baseline.sh` should complete successfully
 2. If there is anything on the Vultr server worth keeping, export it over SSH first.
 3. Keep the local files in `secrets/PROXY/xray/` exactly as they are. Repo-side configs cost nothing and are the only historical record of the failed Vultr attempt.
 

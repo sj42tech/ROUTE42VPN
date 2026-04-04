@@ -24,6 +24,31 @@ if [[ -n "$OLD_HOST_SSH_KEY" ]]; then
   OLD_SSH_OPTS+=(-i "$OLD_HOST_SSH_KEY")
 fi
 
+echo "Detecting reference Xray version on ${OLD_HOST}..."
+SOURCE_VERSION="$(
+  ssh "${OLD_SSH_OPTS[@]}" "$OLD_HOST" 'bash -se' <<'EOF'
+set -euo pipefail
+SUDO=""
+if [[ "$(id -u)" -ne 0 ]]; then
+  SUDO=sudo
+fi
+
+VERSION="$($SUDO /usr/local/bin/xray version 2>/dev/null | head -n1 || true)"
+if [[ -z "$VERSION" ]]; then
+  VERSION="$($SUDO xray version 2>/dev/null | head -n1 || true)"
+fi
+
+if [[ -z "$VERSION" ]]; then
+  echo "Reference host does not expose xray version." >&2
+  exit 1
+fi
+
+printf '%s\n' "$VERSION"
+EOF
+)"
+
+echo "Reference Xray version: $SOURCE_VERSION"
+
 echo "Installing Xray on ${NEW_HOST} if needed..."
 ssh "${NEW_SSH_OPTS[@]}" "$NEW_HOST" 'bash -se' <<EOF
 set -euo pipefail
@@ -61,6 +86,7 @@ $SUDO tar czf - "${paths[@]}"
 EOF
 
 echo "Reloading systemd and validating Xray on ${NEW_HOST}..."
+TARGET_VERSION="$(
 ssh "${NEW_SSH_OPTS[@]}" "$NEW_HOST" 'bash -se' <<'EOF'
 set -euo pipefail
 SUDO=""
@@ -78,13 +104,40 @@ $SUDO ss -ltnp | grep ':443' || {
   echo "Xray is not listening on :443 after migration." >&2
   exit 1
 }
+
+VERSION="$($SUDO /usr/local/bin/xray version 2>/dev/null | head -n1 || true)"
+if [[ -z "$VERSION" ]]; then
+  VERSION="$($SUDO xray version 2>/dev/null | head -n1 || true)"
+fi
+
+printf '%s\n' "$VERSION"
 EOF
+)"
+
+TARGET_VERSION="$(printf '%s\n' "$TARGET_VERSION" | tail -n1)"
+
+if [[ -z "$TARGET_VERSION" ]]; then
+  echo "Could not read Xray version from ${NEW_HOST} after migration." >&2
+  exit 1
+fi
+
+if [[ "$TARGET_VERSION" != "$SOURCE_VERSION" ]]; then
+  cat >&2 <<EOF
+Xray version mismatch after migration.
+Reference: $SOURCE_VERSION
+Target:    $TARGET_VERSION
+EOF
+  exit 1
+fi
+
+echo "Target Xray version matches reference: $TARGET_VERSION"
 
 cat <<EOF
 Migration finished.
 
 Old host: $OLD_HOST
 New host: $NEW_HOST
+Xray version: $TARGET_VERSION
 
 Next:
   1. Update your VLESS link to point at the new server IP.

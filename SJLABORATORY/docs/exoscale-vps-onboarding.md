@@ -36,6 +36,12 @@ Live provisioning status on `2026-03-22`:
 - `Hostkey 5.39.219.74` remains intact and is still the one-command rollback target
 - Exoscale is now both a working server-side candidate and a working live desktop path
 
+Later route-health note:
+
+- by `2026-03-27` and `2026-03-28`, later diagnostics showed that the Exoscale path had degraded materially from the local client network
+- Exoscale remained healthy server-side, but the client-to-server route became much worse than `Hostkey`
+- see `docs/vpn-path-degradation-2026-03-27-to-2026-03-28.md`
+
 ## Live Diagnostics Summary
 
 HTTP proxy diagnostics after live cutover:
@@ -105,7 +111,7 @@ Use the local helper script:
 ```bash
 export EXOSCALE_API_KEY='...'
 export EXOSCALE_API_SECRET='...'
-/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/exoscale-create-server.sh
+/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/SJLABORATORY/ops/exoscale-create-server.sh
 ```
 
 Useful overrides:
@@ -132,18 +138,18 @@ Migration notes:
 
 Local Exoscale client config:
 
-- `/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/secrets/PROXY/xray/config.exoscale.json`
+- `/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/SJLABORATORY/secrets/PROXY/xray/config.exoscale.json`
 
 Safe canary only:
 
 ```bash
-/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/switch-to-exoscale.sh
+/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/SJLABORATORY/ops/switch-to-exoscale.sh
 ```
 
 Real live cutover with automatic rollback to `5.39.219.74` if checks fail:
 
 ```bash
-ALLOW_LIVE_SWITCH=1 /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/switch-to-exoscale.sh
+ALLOW_LIVE_SWITCH=1 /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/SJLABORATORY/ops/switch-to-exoscale.sh
 ```
 
 Current state:
@@ -153,7 +159,7 @@ Current state:
 Manual rollback:
 
 ```bash
-/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/rollback-to-baseline.sh
+/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/SJLABORATORY/ops/rollback-to-baseline.sh
 ```
 
 ## Project Rule

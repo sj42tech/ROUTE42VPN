@@ -239,5 +239,5 @@ Created Vultr instance:
 
 Next:
   ssh root@$MAIN_IP
-  /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/migrate-xray-from-old-vps.sh root@$MAIN_IP
+  /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/SJLABORATORY/ops/migrate-xray-from-old-vps.sh root@$MAIN_IP
 EOF

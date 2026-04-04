@@ -475,5 +475,5 @@ Created Exoscale server:
 
 Next:
   ssh debian@${INSTANCE_IP:-<pending-ip>}
-  /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/ops/migrate-xray-from-old-vps.sh debian@${INSTANCE_IP:-<pending-ip>}
+  /Users/sergeibystrov/PROJECTS/test/VPNCLIENT/SJLABORATORY/ops/migrate-xray-from-old-vps.sh debian@${INSTANCE_IP:-<pending-ip>}
 EOF
