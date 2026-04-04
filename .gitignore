@@ -16,4 +16,11 @@
 /*.apk
 /*.png
 /branding/variant-*.png
+/ROUTE42/.gradle/
+/ROUTE42/app/build/
+/ROUTE42/build/
+/ROUTE42/local.properties
+/ROUTE42/captures/
+/ROUTE42/*.apk
+/ROUTE42/branding/variant-*.png
 /secrets/

@@ -12,6 +12,9 @@ permissions:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ROUTE42
     env:
       ROUTE42_KEYSTORE_BASE64: ${{ secrets.ROUTE42_KEYSTORE_BASE64 }}
       ROUTE42_KEYSTORE_PASSWORD: ${{ secrets.ROUTE42_KEYSTORE_PASSWORD }}
@@ -65,7 +68,7 @@ jobs:
             version="manual-${GITHUB_RUN_NUMBER}"
           fi
           asset_name="Route42-${version}-release.apk"
-          asset_path="dist/${asset_name}"
+          asset_path="${PWD}/dist/${asset_name}"
           cp app/build/outputs/apk/release/app-release.apk "${asset_path}"
 
           echo "asset_name=${asset_name}" >> "${GITHUB_OUTPUT}"
