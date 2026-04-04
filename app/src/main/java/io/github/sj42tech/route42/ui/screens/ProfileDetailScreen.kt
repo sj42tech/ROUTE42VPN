@@ -28,12 +28,14 @@ import io.github.sj42tech.route42.model.RoutingMode
 import io.github.sj42tech.route42.model.RoutingProfile
 import io.github.sj42tech.route42.model.RoutingPreset
 import io.github.sj42tech.route42.model.label
+import io.github.sj42tech.route42.tunnel.ProfileHealthCheck
 import io.github.sj42tech.route42.tunnel.TunnelRuntime
 import io.github.sj42tech.route42.tunnel.TunnelStatus
 import io.github.sj42tech.route42.tunnel.TunnelServiceController
 import io.github.sj42tech.route42.ui.rememberTunnelConnectAction
 import io.github.sj42tech.route42.ui.endpointConnectionSummary
 import io.github.sj42tech.route42.ui.components.OptionSelector
+import io.github.sj42tech.route42.ui.components.ProfileHealthCheckCard
 import io.github.sj42tech.route42.ui.components.TunnelStatusCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,9 +44,11 @@ internal fun ProfileDetailScreen(
     profile: ConnectionProfile,
     routingProfile: RoutingProfile,
     routingUsageCount: Int,
+    healthCheck: ProfileHealthCheck?,
     onBack: () -> Unit,
     onModeSelected: (RoutingMode) -> Unit,
     onDnsSelected: (DnsMode) -> Unit,
+    onRunHealthCheck: () -> Unit,
     onManageRoutingProfile: () -> Unit,
     onOpenRoutes: () -> Unit,
 ) {
@@ -117,6 +121,11 @@ internal fun ProfileDetailScreen(
                         }
                         Spacer(modifier = Modifier.height(12.dp))
                         TunnelStatusCard(tunnelState = tunnelState)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        ProfileHealthCheckCard(
+                            check = healthCheck,
+                            onRunCheck = onRunHealthCheck,
+                        )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = "Routing",

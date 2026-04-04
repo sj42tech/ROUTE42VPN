@@ -37,11 +37,13 @@ import io.github.sj42tech.route42.model.ThemeMode
 import io.github.sj42tech.route42.model.isDarkTheme
 import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.model.routingProfileFor
+import io.github.sj42tech.route42.tunnel.ProfileHealthCheck
 import io.github.sj42tech.route42.tunnel.TunnelRuntime
 import io.github.sj42tech.route42.tunnel.TunnelStatus
 import io.github.sj42tech.route42.tunnel.TunnelServiceController
 import io.github.sj42tech.route42.ui.isProfileEnabled
 import io.github.sj42tech.route42.ui.profileConnectionSummary
+import io.github.sj42tech.route42.ui.profileHealthChipLabel
 import io.github.sj42tech.route42.ui.profileRouteIpLabels
 import io.github.sj42tech.route42.ui.profileStatusColor
 import io.github.sj42tech.route42.ui.profileStatusLabel
@@ -52,6 +54,7 @@ import io.github.sj42tech.route42.ui.components.InfoChipRow
 @Composable
 internal fun ProfilesScreen(
     snapshot: ProfilesSnapshot,
+    profileHealthChecks: Map<String, ProfileHealthCheck>,
     storageRecoveryNotice: String?,
     onImport: () -> Unit,
     onOpenProfile: (String) -> Unit,
@@ -115,6 +118,7 @@ internal fun ProfilesScreen(
                 }
                 items(snapshot.profiles, key = ConnectionProfile::id) { profile ->
                     val routingProfile = snapshot.routingProfileFor(profile)
+                    val healthCheck = profileHealthChecks[profile.id]
                     val isBusy = tunnelState.status in setOf(
                         TunnelStatus.STARTING,
                         TunnelStatus.STOPPING,
@@ -173,11 +177,12 @@ internal fun ProfilesScreen(
                             }
                             Spacer(modifier = Modifier.height(10.dp))
                             InfoChipRow(
-                                labels = listOf(
-                                    routingProfile.mode.label(),
-                                    routingProfile.dnsMode.label(),
-                                    "${routingProfile.rules.size} rules",
-                                ),
+                                labels = buildList {
+                                    profileHealthChipLabel(healthCheck)?.let(::add)
+                                    add(routingProfile.mode.label())
+                                    add(routingProfile.dnsMode.label())
+                                    add("${routingProfile.rules.size} rules")
+                                },
                             )
                         }
                     }

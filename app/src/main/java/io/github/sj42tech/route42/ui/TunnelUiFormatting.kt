@@ -4,6 +4,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.EndpointConfig
+import io.github.sj42tech.route42.model.label
+import io.github.sj42tech.route42.tunnel.ProfileHealthCheck
+import io.github.sj42tech.route42.tunnel.ProfileHealthGrade
 import io.github.sj42tech.route42.tunnel.TunnelState
 import io.github.sj42tech.route42.tunnel.TunnelStatus
 
@@ -65,6 +68,15 @@ internal fun tunnelRouteIpLabels(tunnelState: TunnelState): List<String> = build
 }
 
 internal fun profileConnectionSummary(profile: ConnectionProfile): String = endpointConnectionSummary(profile.endpoint)
+
+internal fun profileHealthChipLabel(check: ProfileHealthCheck?): String? = when {
+    check == null -> null
+    check.running -> "Checking..."
+    check.grade == ProfileHealthGrade.BROKEN -> "Broken"
+    check.tcpLatencyMs != null -> "${check.tcpLatencyMs} ms"
+    check.grade != null -> check.grade.label()
+    else -> null
+}
 
 internal fun endpointConnectionSummary(endpoint: EndpointConfig): String = buildList {
     add(endpoint.protocol.name)

@@ -42,6 +42,7 @@ private object AppRoute {
 fun Route42App(viewModel: AppViewModel) {
     val snapshot = viewModel.snapshot.collectAsStateWithLifecycle().value
     val storageRecoveryNotice = viewModel.storageRecoveryNotice.collectAsStateWithLifecycle().value
+    val profileHealthChecks = viewModel.profileHealthChecks.collectAsStateWithLifecycle().value
     val navController = rememberNavController()
 
     Route42Theme(darkTheme = snapshot.themeMode.isDarkTheme()) {
@@ -54,6 +55,7 @@ fun Route42App(viewModel: AppViewModel) {
                 composable(AppRoute.Profiles) {
                     ProfilesScreen(
                         snapshot = snapshot,
+                        profileHealthChecks = profileHealthChecks,
                         storageRecoveryNotice = storageRecoveryNotice,
                         onImport = { navController.navigate(AppRoute.Import) },
                         onOpenProfile = { navController.navigate(AppRoute.details(it)) },
@@ -91,9 +93,11 @@ fun Route42App(viewModel: AppViewModel) {
                             profile = profile,
                             routingProfile = routingProfile,
                             routingUsageCount = migratedSnapshot.profilesUsingRoutingProfile(routingProfile.id).size,
+                            healthCheck = profileHealthChecks[profile.id],
                             onBack = { navController.popBackStack() },
                             onModeSelected = { viewModel.setRoutingMode(profile.id, it) },
                             onDnsSelected = { viewModel.setDnsMode(profile.id, it) },
+                            onRunHealthCheck = { viewModel.runProfileHealthCheck(profile, routingProfile) },
                             onManageRoutingProfile = { navController.navigate(AppRoute.routingProfile(profile.id)) },
                             onOpenRoutes = { navController.navigate(AppRoute.routes(profile.id)) },
                         )

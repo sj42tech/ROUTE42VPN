@@ -32,6 +32,21 @@ class TunnelConnectSmokeTest {
     }
 
     @Test
+    fun runsLinkHealthCheckFromProfileScreen() {
+        importProfile(BaselineRealityLink)
+        composeRule.onNodeWithText("Run Check").assertIsDisplayed().performClick()
+
+        composeRule.waitUntil(timeoutMillis = 20_000) {
+            runCatching {
+                composeRule.onNodeWithText("Server TCP: reachable", substring = true).assertIsDisplayed()
+            }.isSuccess
+        }
+
+        composeRule.onNodeWithText("Profile is ready to connect").assertIsDisplayed()
+        composeRule.onNodeWithText("Server TCP: reachable", substring = true).assertIsDisplayed()
+    }
+
+    @Test
     fun rejectsBrokenRealityLinkOnImportScreen() {
         composeRule.onNodeWithText("Import").assertIsDisplayed().performClick()
         composeRule.onNode(hasSetTextAction()).performTextInput(BrokenRealityLink)
@@ -93,17 +108,17 @@ class TunnelConnectSmokeTest {
     private companion object {
         const val BaselineRealityLink =
             "vless://775ed879-a162-45e3-b8af-c49f96eaede5@5.39.219.74:443?" +
-                "encryption=none&flow=xtls-rprx-vision&security=reality&sni=www.microsoft.com&" +
-                "fp=chrome&pbk=fivTvehL9FxvXGc9TmVPtOJa2baWSl8DkyAvoTLb0Q8&sid=f3aa&spx=%2F&type=tcp#android-smoke"
+                "encryption=none&security=reality&sni=www.debian.org&" +
+                "fp=chrome&pbk=xAjc3oJaoU9psF_G2zQB5N-HV1ClgKQ1K8atsPPL6CY&sid=a1&type=tcp#android-smoke"
 
         const val SharedRealityLink =
             "vless://775ed879-a162-45e3-b8af-c49f96eaede5@5.39.219.74:443?" +
-                "encryption=none&flow=xtls-rprx-vision&security=reality&sni=www.microsoft.com&" +
-                "fp=chrome&pbk=fivTvehL9FxvXGc9TmVPtOJa2baWSl8DkyAvoTLb0Q8&sid=f3aa&spx=%2F&type=tcp#android-shared"
+                "encryption=none&security=reality&sni=www.debian.org&" +
+                "fp=chrome&pbk=xAjc3oJaoU9psF_G2zQB5N-HV1ClgKQ1K8atsPPL6CY&sid=a1&type=tcp#android-shared"
 
         const val BrokenRealityLink =
             "vless://775ed879-a162-45e3-b8af-c49f96eaede5@5.39.219.74:443?" +
-                "encryption=none&flow=xtls-rprx-vision&security=reality&" +
-                "fp=chrome&pbk=fivTvehL9FxvXGc9TmVPtOJa2baWSl8DkyAvoTLb0Q8&sid=f3aa&spx=%2F&type=tcp#android-broken"
+                "encryption=none&security=reality&" +
+                "fp=chrome&pbk=xAjc3oJaoU9psF_G2zQB5N-HV1ClgKQ1K8atsPPL6CY&sid=a1&type=tcp#android-broken"
     }
 }
