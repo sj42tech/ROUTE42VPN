@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
@@ -77,6 +78,25 @@ class TunnelConnectSmokeTest {
         composeRule.onNodeWithText("Connect").performClick()
 
         assertVpnConnected()
+    }
+
+    @Test
+    fun opensShareCodeScreenForImportedProfile() {
+        importProfile(BaselineRealityLink)
+        composeRule.onNodeWithText("Choose Routing Profile").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Create RU + Local Profile").assertIsDisplayed().performClick()
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            runCatching { composeRule.onNodeWithText("Preset: RU + Local").assertIsDisplayed() }.isSuccess
+        }
+
+        composeRule.onNodeWithText("Show Code").assertIsDisplayed().performClick()
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            runCatching {
+                composeRule.onNodeWithContentDescription("Share code for android-smoke").assertIsDisplayed()
+            }.isSuccess
+        }
+        composeRule.onNodeWithText("Scan this code in Route42 on another device to import the same connection.").assertIsDisplayed()
+        composeRule.onNodeWithText("RU + Local").assertIsDisplayed()
     }
 
     private fun importProfile(link: String) {

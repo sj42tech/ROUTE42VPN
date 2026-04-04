@@ -16,5 +16,6 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithText("Route42").assertIsDisplayed()
         composeRule.onNodeWithText("Import").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Import Link").assertIsDisplayed()
+        composeRule.onNodeWithText("Scan Code").assertIsDisplayed()
     }
 }

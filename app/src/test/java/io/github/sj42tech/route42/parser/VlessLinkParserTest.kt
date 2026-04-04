@@ -5,6 +5,7 @@ import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.MatchType
 import io.github.sj42tech.route42.model.RoutingAction
 import io.github.sj42tech.route42.model.RoutingMode
+import io.github.sj42tech.route42.model.RoutingPreset
 import io.github.sj42tech.route42.model.RoutingRuleSource
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -55,6 +56,20 @@ class VlessLinkParserTest {
         assertEquals("tunnel.example", profile.routingProfile.rules[3].value)
         assertEquals(RoutingAction.BLOCK, profile.routingProfile.rules[4].action)
         assertEquals(MatchType.DOMAIN_SUFFIX, profile.routingProfile.rules[4].matchType)
+    }
+
+    @Test
+    fun `parses route42 preset from share link`() {
+        val profile = VlessLinkParser.parse(
+            "vless://${TestFixtures.Uuid}@${TestFixtures.Server}:${TestFixtures.Port}?" +
+                "encryption=none&security=reality&sni=${TestFixtures.ServerName}&fp=chrome&" +
+                "pbk=${TestFixtures.PublicKey}&sid=${TestFixtures.ShortId}&type=tcp&" +
+                "x-route42-preset=ru-local-v1&x-route42-mode=rule&x-route42-dns=split#preset",
+        )
+
+        assertEquals(RoutingPreset.RU_LOCAL_V1, profile.routingProfile.preset)
+        assertEquals(RoutingMode.RULE, profile.routingProfile.mode)
+        assertEquals(DnsMode.SPLIT, profile.routingProfile.dnsMode)
     }
 
     @Test

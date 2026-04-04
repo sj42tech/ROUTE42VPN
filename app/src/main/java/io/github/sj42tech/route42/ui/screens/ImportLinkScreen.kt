@@ -1,5 +1,8 @@
 package io.github.sj42tech.route42.ui.screens
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,14 +26,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import io.github.sj42tech.route42.config.SingBoxConfigGenerator
-import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
 import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.parser.VlessLinkParser
-import io.github.sj42tech.route42.ui.endpointConnectionSummary
 import io.github.sj42tech.route42.ui.components.InfoChipRow
+import io.github.sj42tech.route42.ui.endpointConnectionSummary
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +46,7 @@ internal fun ImportLinkScreen(
     onSave: suspend (ConnectionProfileWithRouting) -> Unit,
 ) {
     var linkText by rememberSaveable { mutableStateOf("") }
+    var scannerError by rememberSaveable { mutableStateOf<String?>(null) }
     val parseResult = remember(linkText) {
         linkText.takeIf(String::isNotBlank)?.let {
             runCatching { VlessLinkParser.parse(it) }
@@ -55,6 +62,15 @@ internal fun ImportLinkScreen(
         }
     }
     val coroutineScope = rememberCoroutineScope()
+    val scanCode = rememberImportCodeScanner(
+        onScanned = { scannedText ->
+            scannerError = null
+            linkText = scannedText
+        },
+        onError = { message ->
+            scannerError = message
+        },
+    )
 
     Scaffold(
         topBar = {
@@ -83,9 +99,31 @@ internal fun ImportLinkScreen(
                     label = { Text("VLESS or custom VLESS link") },
                     minLines = 4,
                     supportingText = {
-                        Text("Supports regular vless:// links and Route42 routing parameters.")
+                        Text("Supports scanned Data Matrix or QR codes with vless:// links and Route42 routing parameters.")
                     },
                 )
+            }
+            item {
+                Button(
+                    onClick = {
+                        scannerError = null
+                        scanCode()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Scan Code")
+                }
+            }
+            if (scannerError != null) {
+                item {
+                    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = scannerError ?: "",
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(16.dp),
+                        )
+                    }
+                }
             }
             if (parseError != null) {
                 item {
@@ -128,6 +166,53 @@ internal fun ImportLinkScreen(
             }
         }
     }
+}
+
+@Composable
+private fun rememberImportCodeScanner(
+    onScanned: (String) -> Unit,
+    onError: (String) -> Unit,
+): () -> Unit {
+    val context = LocalContext.current
+    val activity = remember(context) { context.findActivity() }
+
+    return remember(activity, context, onScanned, onError) {
+        val launchScanner: () -> Unit = if (activity != null) {
+            val options = GmsBarcodeScannerOptions.Builder()
+                .setBarcodeFormats(
+                    Barcode.FORMAT_DATA_MATRIX,
+                    Barcode.FORMAT_QR_CODE,
+                )
+                .allowManualInput()
+                .enableAutoZoom()
+                .build()
+            val scanner = GmsBarcodeScanning.getClient(activity, options)
+            val startScan: () -> Unit = {
+                scanner.startScan()
+                    .addOnSuccessListener { barcode: Barcode ->
+                        val rawValue = barcode.rawValue?.trim()
+                        if (rawValue.isNullOrBlank()) {
+                            onError("Scanned code did not contain a usable VLESS link")
+                        } else {
+                            onScanned(rawValue)
+                        }
+                    }
+                    .addOnFailureListener { error: Exception ->
+                        onError(error.message ?: "Unable to start the code scanner")
+                    }
+            }
+            startScan
+        } else {
+            { onError("Scanner is unavailable in this context") }
+        }
+        launchScanner
+    }
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
 
 @Composable

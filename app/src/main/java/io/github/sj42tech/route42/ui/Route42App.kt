@@ -17,6 +17,7 @@ import io.github.sj42tech.route42.model.routingProfileFor
 import io.github.sj42tech.route42.ui.screens.ImportLinkScreen
 import io.github.sj42tech.route42.ui.screens.MissingProfileScreen
 import io.github.sj42tech.route42.ui.screens.ProfileDetailScreen
+import io.github.sj42tech.route42.ui.screens.ProfileShareCodeScreen
 import io.github.sj42tech.route42.ui.screens.ProfilesScreen
 import io.github.sj42tech.route42.ui.screens.RoutingEditorScreen
 import io.github.sj42tech.route42.ui.screens.RoutingProfilePickerScreen
@@ -30,12 +31,15 @@ private object AppRoute {
     const val ProfileDetails = "profile/{profileId}"
     const val ProfileRoutes = "profile/{profileId}/routes"
     const val ProfileRoutingProfile = "profile/{profileId}/routing-profile"
+    const val ProfileShareCode = "profile/{profileId}/show-code"
 
     fun details(profileId: String): String = "profile/$profileId"
 
     fun routes(profileId: String): String = "profile/$profileId/routes"
 
     fun routingProfile(profileId: String): String = "profile/$profileId/routing-profile"
+
+    fun shareCode(profileId: String): String = "profile/$profileId/show-code"
 }
 
 @Composable
@@ -98,8 +102,26 @@ fun Route42App(viewModel: AppViewModel) {
                             onModeSelected = { viewModel.setRoutingMode(profile.id, it) },
                             onDnsSelected = { viewModel.setDnsMode(profile.id, it) },
                             onRunHealthCheck = { viewModel.runProfileHealthCheck(profile, routingProfile) },
+                            onOpenShareCode = { navController.navigate(AppRoute.shareCode(profile.id)) },
                             onManageRoutingProfile = { navController.navigate(AppRoute.routingProfile(profile.id)) },
                             onOpenRoutes = { navController.navigate(AppRoute.routes(profile.id)) },
+                        )
+                    }
+                }
+                composable(
+                    route = AppRoute.ProfileShareCode,
+                    arguments = listOf(navArgument("profileId") { type = NavType.StringType }),
+                ) { backStackEntry ->
+                    val profileId = checkNotNull(backStackEntry.arguments?.getString("profileId"))
+                    val profile = migratedSnapshot.profiles.firstOrNull { it.id == profileId }
+
+                    if (profile == null) {
+                        MissingProfileScreen(onBack = { navController.popBackStack() })
+                    } else {
+                        ProfileShareCodeScreen(
+                            profile = profile,
+                            routingProfile = migratedSnapshot.routingProfileFor(profile),
+                            onBack = { navController.popBackStack() },
                         )
                     }
                 }

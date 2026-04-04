@@ -9,6 +9,7 @@ import io.github.sj42tech.route42.model.MatchType
 import io.github.sj42tech.route42.model.RoutingAction
 import io.github.sj42tech.route42.model.RoutingMode
 import io.github.sj42tech.route42.model.RoutingProfile
+import io.github.sj42tech.route42.model.RoutingPreset
 import io.github.sj42tech.route42.model.RoutingRule
 import io.github.sj42tech.route42.model.RoutingRuleSource
 import io.github.sj42tech.route42.model.defaultDnsMode
@@ -95,6 +96,9 @@ object VlessLinkParser {
     }
 
     private fun parseRouting(queryParameters: Map<String, List<String>>): RoutingProfile {
+        val preset = queryParameters.lastValue(VlessLinkKeys.PresetKeys)
+            ?.let(::parseRoutingPreset)
+            ?: RoutingPreset.NONE
         val mode = queryParameters.lastValue(VlessLinkKeys.ModeKeys)
             ?.let(::parseRoutingMode)
             ?: RoutingMode.PROXY
@@ -117,6 +121,7 @@ object VlessLinkParser {
         }
 
         return RoutingProfile(
+            preset = preset,
             mode = mode,
             dnsMode = dnsMode,
             rules = rules,
@@ -155,6 +160,11 @@ object VlessLinkParser {
         "proxy" -> DnsMode.PROXY
         "split" -> DnsMode.SPLIT
         else -> throw LinkParseException("Unknown DNS mode: $value")
+    }
+
+    private fun parseRoutingPreset(value: String): RoutingPreset = when (value.lowercase()) {
+        "ru-local-v1" -> RoutingPreset.RU_LOCAL_V1
+        else -> throw LinkParseException("Unknown routing preset: $value")
     }
 
     private fun parseQueryParameters(rawQuery: String?): Map<String, List<String>> {

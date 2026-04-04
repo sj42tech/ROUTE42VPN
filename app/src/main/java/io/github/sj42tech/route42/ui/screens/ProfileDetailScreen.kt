@@ -49,6 +49,7 @@ internal fun ProfileDetailScreen(
     onModeSelected: (RoutingMode) -> Unit,
     onDnsSelected: (DnsMode) -> Unit,
     onRunHealthCheck: () -> Unit,
+    onOpenShareCode: () -> Unit,
     onManageRoutingProfile: () -> Unit,
     onOpenRoutes: () -> Unit,
 ) {
@@ -118,6 +119,13 @@ internal fun ProfileDetailScreen(
                                     else -> "Connect"
                                 },
                             )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            onClick = onOpenShareCode,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text("Show Code")
                         }
                         Spacer(modifier = Modifier.height(12.dp))
                         TunnelStatusCard(tunnelState = tunnelState)
