@@ -95,18 +95,19 @@ This applies to:
 
 ## Workspace Docs
 
-- [../docs/vps-audit-2026-03-22.md](../docs/vps-audit-2026-03-22.md)
-- [../docs/exoscale-vps-onboarding.md](../docs/exoscale-vps-onboarding.md)
-- [../docs/uhost-vps-onboarding.md](../docs/uhost-vps-onboarding.md)
-- [../docs/vultr-zero-cost-exit.md](../docs/vultr-zero-cost-exit.md)
-- [../ops/README.md](../ops/README.md)
+- [../ignored-local-storage/docs/vps-audit-2026-03-22.md](../ignored-local-storage/docs/vps-audit-2026-03-22.md)
+- [../ignored-local-storage/docs/exoscale-vps-onboarding.md](../ignored-local-storage/docs/exoscale-vps-onboarding.md)
+- [../ignored-local-storage/docs/uhost-vps-onboarding.md](../ignored-local-storage/docs/uhost-vps-onboarding.md)
+- [../ignored-local-storage/docs/vultr-zero-cost-exit.md](../ignored-local-storage/docs/vultr-zero-cost-exit.md)
+- [../ignored-local-storage/ops/README.md](../ignored-local-storage/ops/README.md)
 
 ## GitHub Releases
 
 This repo includes a signed release APK workflow for GitHub Actions.
 
 - The canonical signed release path for this repo is GitHub Actions, and the required signing secrets are already configured there.
-- A local helper script is available at `../secrets/print-github-secrets.sh` to print the four GitHub secret values from ignored local files.
+- App-local keystore material lives in the ignored `secrets/` directory under `ROUTE42/`.
+- A local helper script is available at `secrets/print-github-secrets.sh` to print the four GitHub secret values from ignored local files.
 - Run the `Release APK` workflow manually to build a signed release artifact.
 - Push a tag like `v0.1.1` to build a signed APK and attach it to the matching GitHub Release.
 
