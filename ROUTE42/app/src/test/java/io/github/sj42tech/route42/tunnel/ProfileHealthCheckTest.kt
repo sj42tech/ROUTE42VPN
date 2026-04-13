@@ -57,6 +57,10 @@ class ProfileHealthCheckTest {
                 profileId = "profile-1",
                 publicIp = "203.0.113.10",
                 directPublicIp = "198.51.100.10",
+                tunnelSiteProbes = listOf(
+                    TunnelSiteProbe(label = "Google", url = "https://google.test", reachable = true),
+                    TunnelSiteProbe(label = "GitHub", url = "https://github.test", reachable = true),
+                ),
             ),
             profileId = "profile-1",
         )
@@ -70,6 +74,10 @@ class ProfileHealthCheckTest {
                     profileId = "profile-1",
                     publicIp = "203.0.113.10",
                     directPublicIp = "198.51.100.10",
+                    tunnelSiteProbes = listOf(
+                        TunnelSiteProbe(label = "Google", url = "https://google.test", reachable = true),
+                        TunnelSiteProbe(label = "GitHub", url = "https://github.test", reachable = true),
+                    ),
                 ),
                 profileId = "profile-1",
             ),
@@ -103,6 +111,37 @@ class ProfileHealthCheckTest {
                 ),
                 profileId = "profile-1",
             ).contains("suspicious", ignoreCase = true),
+        )
+    }
+
+    @Test
+    fun `returns degraded when some popular tunnel sites are unreachable`() {
+        val tunnelState = TunnelState(
+            status = TunnelStatus.RUNNING,
+            profileId = "profile-1",
+            publicIp = "203.0.113.10",
+            directPublicIp = "198.51.100.10",
+            tunnelSiteProbes = listOf(
+                TunnelSiteProbe(label = "Google", url = "https://google.test", reachable = true),
+                TunnelSiteProbe(label = "GitHub", url = "https://github.test", reachable = false, detail = "timeout"),
+            ),
+        )
+
+        val grade = deriveProfileHealthGrade(
+            tcpProbe = ProbeOutcome(reachable = true, latencyMs = 220),
+            tlsProbe = ProbeOutcome(reachable = true, latencyMs = 340),
+            tunnelState = tunnelState,
+            profileId = "profile-1",
+        )
+
+        assertEquals(ProfileHealthGrade.DEGRADED, grade)
+        assertTrue(
+            summarizeProfileHealth(
+                tcpProbe = ProbeOutcome(reachable = true, latencyMs = 220),
+                tlsProbe = ProbeOutcome(reachable = true, latencyMs = 340),
+                tunnelState = tunnelState,
+                profileId = "profile-1",
+            ).contains("popular sites", ignoreCase = true),
         )
     }
 }

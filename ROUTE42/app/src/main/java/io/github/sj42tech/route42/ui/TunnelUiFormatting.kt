@@ -65,6 +65,23 @@ internal fun tunnelRouteIpLabels(tunnelState: TunnelState): List<String> = build
         !tunnelState.localNetworkIp.isNullOrBlank() -> add("LAN IP: ${tunnelState.localNetworkIp}")
         tunnelState.resolvingPublicIp -> add("LAN IP: detecting...")
     }
+    when {
+        tunnelState.tunnelSiteProbes.isNotEmpty() -> {
+            val reachableCount = tunnelState.tunnelSiteProbes.count { it.reachable }
+            add("Popular Sites: $reachableCount/${tunnelState.tunnelSiteProbes.size} reachable")
+            tunnelState.tunnelSiteProbes.forEach { probe ->
+                val status = if (probe.reachable) "reachable" else "failed"
+                val detail = if (probe.reachable || probe.detail.isNullOrBlank()) {
+                    ""
+                } else {
+                    " (${probe.detail})"
+                }
+                add("${probe.label}: $status$detail")
+            }
+        }
+        tunnelState.resolvingPublicIp -> add("Popular Sites: checking...")
+        tunnelState.status == TunnelStatus.RUNNING -> add("Popular Sites: unavailable")
+    }
 }
 
 internal fun profileConnectionSummary(profile: ConnectionProfile): String = endpointConnectionSummary(profile.endpoint)

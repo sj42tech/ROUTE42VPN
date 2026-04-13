@@ -12,6 +12,13 @@ enum class TunnelStatus {
     ERROR,
 }
 
+data class TunnelSiteProbe(
+    val label: String,
+    val url: String,
+    val reachable: Boolean,
+    val detail: String? = null,
+)
+
 data class TunnelState(
     val status: TunnelStatus = TunnelStatus.STOPPED,
     val profileId: String? = null,
@@ -21,6 +28,7 @@ data class TunnelState(
     val directPublicIp: String? = null,
     val localNetworkIp: String? = null,
     val resolvingPublicIp: Boolean = false,
+    val tunnelSiteProbes: List<TunnelSiteProbe> = emptyList(),
     val logs: List<String> = emptyList(),
 )
 
@@ -50,6 +58,7 @@ object TunnelRuntime {
                 directPublicIp = null,
                 localNetworkIp = null,
                 resolvingPublicIp = false,
+                tunnelSiteProbes = emptyList(),
             )
         }
         appendLog("starting tunnel for $profileName")
@@ -66,6 +75,7 @@ object TunnelRuntime {
                 directPublicIp = null,
                 localNetworkIp = null,
                 resolvingPublicIp = true,
+                tunnelSiteProbes = emptyList(),
             )
         }
         appendLog("tunnel is running")
@@ -87,6 +97,7 @@ object TunnelRuntime {
                 directPublicIp = null,
                 localNetworkIp = null,
                 resolvingPublicIp = false,
+                tunnelSiteProbes = emptyList(),
             )
         }
         if (!reason.isNullOrBlank()) {
@@ -103,18 +114,25 @@ object TunnelRuntime {
                 directPublicIp = null,
                 localNetworkIp = null,
                 resolvingPublicIp = false,
+                tunnelSiteProbes = emptyList(),
             )
         }
         appendLog(message)
     }
 
-    fun setResolvedAddresses(publicIp: String?, directPublicIp: String?, localNetworkIp: String?) {
+    fun setResolvedAddresses(
+        publicIp: String?,
+        directPublicIp: String?,
+        localNetworkIp: String?,
+        tunnelSiteProbes: List<TunnelSiteProbe>,
+    ) {
         mutableState.update {
             it.copy(
                 publicIp = publicIp,
                 directPublicIp = directPublicIp,
                 localNetworkIp = localNetworkIp,
                 resolvingPublicIp = false,
+                tunnelSiteProbes = tunnelSiteProbes,
             )
         }
     }
