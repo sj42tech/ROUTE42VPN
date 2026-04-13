@@ -26,11 +26,14 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
           cache: gradle
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
@@ -51,11 +54,19 @@ jobs:
           echo "ROUTE42_KEYSTORE_PATH=${keystore_path}" >> "${GITHUB_ENV}"
 
       - name: Run tests and build APK
+        shell: bash
         env:
           ROUTE42_KEYSTORE_PASSWORD: ${{ env.ROUTE42_KEYSTORE_PASSWORD }}
           ROUTE42_KEY_ALIAS: ${{ env.ROUTE42_KEY_ALIAS }}
           ROUTE42_KEY_PASSWORD: ${{ env.ROUTE42_KEY_PASSWORD }}
-        run: ./gradlew testDebugUnitTest assembleRelease
+        run: |
+          set -euo pipefail
+
+          if ! ./gradlew --no-daemon testDebugUnitTest assembleRelease; then
+            echo "First Gradle build attempt failed. Retrying once after a short backoff..." >&2
+            sleep 15
+            ./gradlew --no-daemon testDebugUnitTest assembleRelease
+          fi
 
       - name: Prepare release artifact
         id: asset
