@@ -27,10 +27,11 @@ class TunnelConnectSmokeTest {
 
     @Test
     fun importsRealityProfileAndReachesRunningState() {
-        importProfile(requireLiveBaselineLink())
+        val link = requireLiveBaselineLink()
+        importProfile(link)
         composeRule.onNodeWithText("Connect").performClick()
 
-        assertVpnConnected()
+        assertRealTunnelConnected(link)
     }
 
     @Test
@@ -78,7 +79,7 @@ class TunnelConnectSmokeTest {
         composeRule.onNodeWithText("Preset: RU + Local").assertIsDisplayed()
         composeRule.onNodeWithText("Connect").performClick()
 
-        assertVpnConnected()
+        assertRealTunnelConnected(requireLiveSharedLink())
     }
 
     @Test
@@ -109,7 +110,7 @@ class TunnelConnectSmokeTest {
         }
     }
 
-    private fun assertVpnConnected() {
+    private fun assertRealTunnelConnected(link: String) {
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         device.wait(Until.findObject(By.text("OK")), 5_000)?.click()
         device.waitForIdle()
@@ -124,6 +125,25 @@ class TunnelConnectSmokeTest {
             connectivityDump,
             connectivityDump.contains("VPN CONNECTED extra: VPN:io.github.sj42tech.route42"),
         )
+
+        val expectedExitIp = readInstrumentationArgument("route42.expected_exit_ip")
+            ?.takeUnless(String::isBlank)
+            ?: parseExpectedExitIp(link)
+        val expectedSiteSummary = "Popular Sites: ${RequiredPopularSiteLabels.size}/${RequiredPopularSiteLabels.size} reachable"
+        composeRule.onNode(hasScrollAction()).performScrollToNode(hasText("Tunnel Status"))
+        composeRule.waitUntil(timeoutMillis = 60_000) {
+            runCatching {
+                if (expectedExitIp != null) {
+                    composeRule.onNodeWithText("Exit IP: $expectedExitIp").assertIsDisplayed()
+                } else {
+                    composeRule.onNodeWithText("Exit IP:", substring = true).assertIsDisplayed()
+                }
+                composeRule.onNodeWithText(expectedSiteSummary).assertIsDisplayed()
+                RequiredPopularSiteLabels.forEach { label ->
+                    composeRule.onNodeWithText("$label: reachable").assertIsDisplayed()
+                }
+            }.isSuccess
+        }
     }
 
     private fun requireLiveBaselineLink(): String =
@@ -146,7 +166,29 @@ class TunnelConnectSmokeTest {
     private fun withProfileName(link: String, profileName: String): String =
         "${link.substringBefore('#')}#$profileName"
 
+    private fun parseExpectedExitIp(link: String): String? {
+        val host = link.substringAfter('@', "").substringBefore(':').substringBefore('?').trim()
+        if (!Ipv4Regex.matches(host)) {
+            return null
+        }
+        return if (isPrivateIpv4(host)) null else host
+    }
+
+    private fun isPrivateIpv4(host: String): Boolean {
+        if (host.startsWith("10.") || host.startsWith("192.168.") || host.startsWith("127.")) {
+            return true
+        }
+        if (!host.startsWith("172.")) {
+            return false
+        }
+        val secondOctet = host.split('.').getOrNull(1)?.toIntOrNull() ?: return false
+        return secondOctet in 16..31
+    }
+
     private companion object {
+        val RequiredPopularSiteLabels = listOf("Google", "GitHub", "Cloudflare")
+        val Ipv4Regex = Regex("""\d{1,3}(\.\d{1,3}){3}""")
+
         const val ExampleRealityLink =
             "vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?" +
                 "encryption=none&security=reality&sni=cdn.example&" +

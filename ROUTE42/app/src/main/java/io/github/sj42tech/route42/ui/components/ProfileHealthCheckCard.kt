@@ -33,7 +33,7 @@ internal fun ProfileHealthCheckCard(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Runs a safe health check for this profile: config validation, direct server reachability, Reality TLS response, and exit-IP verification when the tunnel is already connected.",
+                text = "Runs a safe health check for this profile: config validation, direct server reachability, Reality TLS response, exit-IP verification, and popular-site checks when the tunnel is already connected.",
                 style = MaterialTheme.typography.bodySmall,
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -82,6 +82,12 @@ internal fun ProfileHealthCheckCard(
                     text = tunnelExitLabel(latestCheck),
                     style = MaterialTheme.typography.bodySmall,
                 )
+                latestCheck.totalPopularSites?.let {
+                    Text(
+                        text = popularSitesLabel(latestCheck),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
                 latestCheck.checkedAtEpochMillis?.let { checkedAt ->
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -118,4 +124,15 @@ private fun tunnelExitLabel(check: ProfileHealthCheck): String = when (check.tun
     TunnelExitStatus.DETECTED -> "Tunnel exit: ${check.exitIp ?: "detected"}${check.directIp?.let { " (direct $it)" }.orEmpty()}"
     TunnelExitStatus.UNAVAILABLE -> "Tunnel exit: tunnel is running, but exit IP is still unavailable"
     TunnelExitStatus.MATCHES_DIRECT -> "Tunnel exit: suspicious, exit IP matches direct IP ${check.directIp.orEmpty()}".trim()
+}
+
+private fun popularSitesLabel(check: ProfileHealthCheck): String {
+    val reachable = check.reachablePopularSites ?: 0
+    val total = check.totalPopularSites ?: 0
+    val failed = check.failedPopularSites
+    return if (failed.isEmpty()) {
+        "Popular sites: $reachable/$total reachable"
+    } else {
+        "Popular sites: $reachable/$total reachable (failed: ${failed.joinToString()})"
+    }
 }

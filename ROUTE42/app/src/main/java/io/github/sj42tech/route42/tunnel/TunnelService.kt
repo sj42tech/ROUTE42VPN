@@ -275,6 +275,7 @@ class TunnelService : VpnService(), PlatformInterface, CommandServerHandler {
                 publicIp = resolved.publicIp,
                 directPublicIp = resolved.directPublicIp,
                 localNetworkIp = resolved.localNetworkIp,
+                tunnelSiteProbes = resolved.tunnelSiteProbes,
             )
         }
     }

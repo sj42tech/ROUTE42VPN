@@ -91,6 +91,8 @@ This applies to:
 - [docs/link-and-routing-spec.md](docs/link-and-routing-spec.md)
 - [docs/route42-team-vps-and-routing-brief-2026-04-04.md](docs/route42-team-vps-and-routing-brief-2026-04-04.md)
 - [docs/mvp-config.md](docs/mvp-config.md)
+- [docs/release-notes-0.1.4.md](docs/release-notes-0.1.4.md)
+- [docs/release-plan-0.1.4.md](docs/release-plan-0.1.4.md)
 - [DONATE.md](DONATE.md)
 
 ## Workspace Docs

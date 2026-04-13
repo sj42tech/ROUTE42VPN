@@ -15,12 +15,32 @@ internal data class ResolvedTunnelAddresses(
     val publicIp: String? = null,
     val directPublicIp: String? = null,
     val localNetworkIp: String? = null,
+    val tunnelSiteProbes: List<TunnelSiteProbe> = emptyList(),
 )
 
 internal object TunnelAddressResolver {
+    private data class PopularSiteTarget(
+        val label: String,
+        val url: String,
+    )
+
     private val ipLookupEndpoints = listOf(
         "https://api.ipify.org",
         "https://ipv4.icanhazip.com",
+    )
+    private val popularSiteTargets = listOf(
+        PopularSiteTarget(
+            label = "Google",
+            url = "https://www.google.com/robots.txt",
+        ),
+        PopularSiteTarget(
+            label = "GitHub",
+            url = "https://www.github.com/robots.txt",
+        ),
+        PopularSiteTarget(
+            label = "Cloudflare",
+            url = "https://www.cloudflare.com/cdn-cgi/trace",
+        ),
     )
 
     fun resolve(
@@ -29,10 +49,14 @@ internal object TunnelAddressResolver {
         connectivity: ConnectivityManager,
         log: (String) -> Unit,
     ): ResolvedTunnelAddresses {
-        val publicIp = runCatching { fetchTunnelPublicIp(config) }
+        val socksPort = parseProbeSocksPort(config)
+        val publicIp = runCatching { fetchTunnelPublicIp(socksPort) }
             .onFailure { log("proxy ip lookup failed: ${it.message}") }
             .getOrNull()
             ?.takeIf(String::isNotBlank)
+        val tunnelSiteProbes = runCatching { fetchTunnelSiteProbes(socksPort) }
+            .onFailure { log("tunnel site probe failed: ${it.message}") }
+            .getOrDefault(emptyList())
         val directPublicIp = runCatching { fetchDirectPublicIp() }
             .onFailure { log("direct ip lookup failed: ${it.message}") }
             .getOrNull()
@@ -42,28 +66,52 @@ internal object TunnelAddressResolver {
             publicIp = publicIp,
             directPublicIp = directPublicIp,
             localNetworkIp = currentLocalNetworkIp(resolverNetwork, connectivity),
+            tunnelSiteProbes = tunnelSiteProbes,
         )
     }
 
-    private fun fetchTunnelPublicIp(config: String): String {
-        val socksPort = parseProbeSocksPort(config)
+    private fun fetchTunnelPublicIp(socksPort: Int): String {
         ipLookupEndpoints.forEach { endpoint ->
             runCatching {
-                val client = Libbox.newHTTPClient()
-                try {
-                    client.modernTLS()
-                    client.trySocks5(socksPort)
+                withTunnelHttpClient(socksPort) { client ->
                     val request = client.newRequest()
                     request.setMethod("GET")
                     request.randomUserAgent()
                     request.setURL(endpoint)
                     request.execute().content.value.trim()
-                } finally {
-                    runCatching { client.close() }
                 }
             }.getOrNull()?.takeIf(String::isNotBlank)?.let { return it }
         }
         error("Unable to resolve tunnel public IP")
+    }
+
+    private fun fetchTunnelSiteProbes(socksPort: Int): List<TunnelSiteProbe> = popularSiteTargets.map { target ->
+        runCatching {
+            withTunnelHttpClient(socksPort) { client ->
+                val request = client.newRequest()
+                request.setMethod("GET")
+                request.randomUserAgent()
+                request.setURL(target.url)
+                val response = request.execute()
+                val contentPreview = runCatching { response.content.value.trim() }
+                    .getOrDefault("")
+                    .take(80)
+                    .ifBlank { null }
+                TunnelSiteProbe(
+                    label = target.label,
+                    url = target.url,
+                    reachable = true,
+                    detail = contentPreview,
+                )
+            }
+        }.getOrElse { error ->
+            TunnelSiteProbe(
+                label = target.label,
+                url = target.url,
+                reachable = false,
+                detail = error.message ?: error::class.java.simpleName,
+            )
+        }
     }
 
     private fun fetchDirectPublicIp(): String {
@@ -96,6 +144,20 @@ internal object TunnelAddressResolver {
             ?.toIntOrNull()
             ?: SingBoxConfigGenerator.LocalProbeSocksPort
     }.getOrDefault(SingBoxConfigGenerator.LocalProbeSocksPort)
+
+    private fun <T> withTunnelHttpClient(
+        socksPort: Int,
+        block: (io.nekohasekai.libbox.HTTPClient) -> T,
+    ): T {
+        val client = Libbox.newHTTPClient()
+        return try {
+            client.modernTLS()
+            client.trySocks5(socksPort)
+            block(client)
+        } finally {
+            runCatching { client.close() }
+        }
+    }
 
     private fun currentLocalNetworkIp(
         resolverNetwork: Network?,

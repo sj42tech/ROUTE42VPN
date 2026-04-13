@@ -38,6 +38,9 @@ data class ProfileHealthCheck(
     val tunnelExitStatus: TunnelExitStatus = TunnelExitStatus.NOT_CHECKED,
     val exitIp: String? = null,
     val directIp: String? = null,
+    val reachablePopularSites: Int? = null,
+    val totalPopularSites: Int? = null,
+    val failedPopularSites: List<String> = emptyList(),
 )
 
 internal data class ProbeOutcome(
@@ -85,6 +88,7 @@ internal object ProfileHealthCheckRunner {
         } else {
             null
         }
+        val activeSiteProbes = activeTunnelSiteProbes(tunnelState, profile.profile.id)
 
         val result = ProfileHealthCheck(
             grade = deriveProfileHealthGrade(
@@ -110,6 +114,11 @@ internal object ProfileHealthCheckRunner {
             tunnelExitStatus = deriveTunnelExitStatus(tunnelState, profile.profile.id),
             exitIp = tunnelState.publicIp,
             directIp = tunnelState.directPublicIp,
+            reachablePopularSites = activeSiteProbes.count { it.reachable }
+                .takeIf { activeSiteProbes.isNotEmpty() },
+            totalPopularSites = activeSiteProbes.size
+                .takeIf { activeSiteProbes.isNotEmpty() },
+            failedPopularSites = activeSiteProbes.filterNot { it.reachable }.map { it.label },
         )
         result
     }
@@ -174,6 +183,16 @@ internal fun deriveProfileHealthGrade(
     }
 
     val exitStatus = deriveTunnelExitStatus(tunnelState, profileId)
+    val activeSiteProbes = activeTunnelSiteProbes(tunnelState, profileId)
+    if (exitStatus == TunnelExitStatus.DETECTED && activeSiteProbes.isNotEmpty()) {
+        val reachableCount = activeSiteProbes.count { it.reachable }
+        if (reachableCount == 0) {
+            return ProfileHealthGrade.BROKEN
+        }
+        if (reachableCount != activeSiteProbes.size) {
+            return ProfileHealthGrade.DEGRADED
+        }
+    }
     return when {
         exitStatus == TunnelExitStatus.NOT_CHECKED -> ProfileHealthGrade.READY
         exitStatus == TunnelExitStatus.DETECTED &&
@@ -214,10 +233,32 @@ internal fun summarizeProfileHealth(
         return "Reality handshake looks broken"
     }
 
-    return when (deriveTunnelExitStatus(tunnelState, profileId)) {
+    val exitStatus = deriveTunnelExitStatus(tunnelState, profileId)
+    val activeSiteProbes = activeTunnelSiteProbes(tunnelState, profileId)
+    if (exitStatus == TunnelExitStatus.DETECTED && activeSiteProbes.isNotEmpty()) {
+        val reachableCount = activeSiteProbes.count { it.reachable }
+        if (reachableCount == 0) {
+            return "Tunnel exit was detected, but popular site probes are failing"
+        }
+        if (reachableCount != activeSiteProbes.size) {
+            return "Tunnel is up, but some popular sites are still unreachable"
+        }
+    }
+
+    return when (exitStatus) {
         TunnelExitStatus.NOT_CHECKED -> "Profile is ready to connect"
         TunnelExitStatus.DETECTED -> "Tunnel is healthy"
         TunnelExitStatus.UNAVAILABLE -> "Tunnel is up, but exit IP is still unavailable"
         TunnelExitStatus.MATCHES_DIRECT -> "Tunnel is up, but exit path looks suspicious"
     }
+}
+
+private fun activeTunnelSiteProbes(
+    tunnelState: TunnelState,
+    profileId: String,
+): List<TunnelSiteProbe> {
+    if (tunnelState.profileId != profileId || tunnelState.status != TunnelStatus.RUNNING) {
+        return emptyList()
+    }
+    return tunnelState.tunnelSiteProbes
 }
