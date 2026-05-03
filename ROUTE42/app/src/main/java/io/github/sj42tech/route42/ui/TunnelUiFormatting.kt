@@ -9,6 +9,8 @@ import io.github.sj42tech.route42.tunnel.ProfileHealthCheck
 import io.github.sj42tech.route42.tunnel.ProfileHealthGrade
 import io.github.sj42tech.route42.tunnel.TunnelState
 import io.github.sj42tech.route42.tunnel.TunnelStatus
+import java.text.DateFormat
+import java.util.Date
 
 internal fun isProfileEnabled(
     tunnelState: TunnelState,
@@ -28,6 +30,16 @@ internal fun profileStatusLabel(
     tunnelState.status == TunnelStatus.STOPPING -> "Disconnecting..."
     tunnelState.status == TunnelStatus.ERROR -> "Error"
     else -> "Disconnected"
+}
+
+internal fun profileConnectionActionLabel(
+    tunnelState: TunnelState,
+    profileId: String,
+): String = when {
+    tunnelState.profileId == profileId && tunnelState.status == TunnelStatus.STARTING -> "Connecting..."
+    tunnelState.profileId == profileId && tunnelState.status == TunnelStatus.RUNNING -> "Disconnect"
+    tunnelState.profileId == profileId && tunnelState.status == TunnelStatus.STOPPING -> "Stopping..."
+    else -> "Connect"
 }
 
 @Composable
@@ -93,6 +105,20 @@ internal fun profileHealthChipLabel(check: ProfileHealthCheck?): String? = when 
     check.tcpLatencyMs != null -> "${check.tcpLatencyMs} ms"
     check.grade != null -> check.grade.label()
     else -> null
+}
+
+internal fun profileHealthSummaryLabel(check: ProfileHealthCheck?): String = when {
+    check == null -> "Quality: not checked yet"
+    check.running -> "Quality: checking link and tunnel..."
+    !check.summary.isNullOrBlank() -> "Quality: ${check.summary}"
+    check.tcpLatencyMs != null -> "Quality: server TCP ${check.tcpLatencyMs} ms"
+    check.grade != null -> "Quality: ${check.grade.label()}"
+    else -> "Quality: not checked yet"
+}
+
+internal fun profileLastCheckChipLabel(check: ProfileHealthCheck?): String? {
+    val checkedAt = check?.checkedAtEpochMillis ?: return null
+    return "Last: ${DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(checkedAt))}"
 }
 
 internal fun endpointConnectionSummary(endpoint: EndpointConfig): String = buildList {

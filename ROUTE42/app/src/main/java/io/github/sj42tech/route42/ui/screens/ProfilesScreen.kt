@@ -3,30 +3,27 @@ package io.github.sj42tech.route42.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -43,14 +40,19 @@ import io.github.sj42tech.route42.tunnel.TunnelStatus
 import io.github.sj42tech.route42.tunnel.TunnelServiceController
 import io.github.sj42tech.route42.ui.isProfileEnabled
 import io.github.sj42tech.route42.ui.profileConnectionSummary
+import io.github.sj42tech.route42.ui.profileConnectionActionLabel
 import io.github.sj42tech.route42.ui.profileHealthChipLabel
+import io.github.sj42tech.route42.ui.profileHealthSummaryLabel
+import io.github.sj42tech.route42.ui.profileLastCheckChipLabel
 import io.github.sj42tech.route42.ui.profileRouteIpLabels
 import io.github.sj42tech.route42.ui.profileStatusColor
 import io.github.sj42tech.route42.ui.profileStatusLabel
 import io.github.sj42tech.route42.ui.rememberTunnelConnectAction
 import io.github.sj42tech.route42.ui.components.InfoChipRow
+import io.github.sj42tech.route42.ui.components.Route42Scaffold
+import io.github.sj42tech.route42.ui.components.Route42ScreenColumn
+import io.github.sj42tech.route42.ui.components.Route42ScreenList
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ProfilesScreen(
     snapshot: ProfilesSnapshot,
@@ -65,30 +67,23 @@ internal fun ProfilesScreen(
     val context = LocalContext.current
     val requestConnect = rememberTunnelConnectAction()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Route42") },
-                actions = {
-                    ThemeSwitchAction(
-                        isDarkTheme = snapshot.themeMode.isDarkTheme(),
-                        onThemeModeChange = onThemeModeChange,
-                    )
-                    TextButton(onClick = onImport) {
-                        Text("Import")
-                    }
-                },
+    Route42Scaffold(
+        title = "Route42",
+        actions = {
+            ThemeSwitchAction(
+                isDarkTheme = snapshot.themeMode.isDarkTheme(),
+                onThemeModeChange = onThemeModeChange,
             )
+            TextButton(
+                onClick = onImport,
+                modifier = Modifier.semantics { contentDescription = "Import VPN profile" },
+            ) {
+                Text("Import")
+            }
         },
     ) { padding ->
         if (snapshot.profiles.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
+            Route42ScreenColumn(innerPadding = padding) {
                 if (storageRecoveryNotice != null) {
                     StorageRecoveryNoticeCard(
                         message = storageRecoveryNotice,
@@ -96,17 +91,16 @@ internal fun ProfilesScreen(
                     )
                 }
                 EmptyProfilesState(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                     onImport = onImport,
                 )
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+            Route42ScreenList(
+                innerPadding = padding,
+                verticalSpacing = 12.dp,
             ) {
                 if (storageRecoveryNotice != null) {
                     item {
@@ -124,6 +118,7 @@ internal fun ProfilesScreen(
                         TunnelStatus.STOPPING,
                     )
                     val isProfileActive = isProfileEnabled(tunnelState, profile.id)
+                    val connectionActionLabel = profileConnectionActionLabel(tunnelState, profile.id)
 
                     OutlinedCard(
                         modifier = Modifier.fillMaxWidth(),
@@ -156,6 +151,11 @@ internal fun ProfilesScreen(
                                         color = profileStatusColor(tunnelState, profile.id),
                                         fontWeight = FontWeight.Medium,
                                     )
+                                    Text(
+                                        text = profileHealthSummaryLabel(healthCheck),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
                                     profileRouteIpLabels(tunnelState, profile.id).forEach { label ->
                                         Text(
                                             text = label,
@@ -163,22 +163,27 @@ internal fun ProfilesScreen(
                                         )
                                     }
                                 }
-                                Switch(
-                                    checked = isProfileActive,
+                                Button(
                                     enabled = !isBusy,
-                                    onCheckedChange = { shouldConnect ->
-                                        if (shouldConnect) {
-                                            requestConnect(profile, routingProfile)
-                                        } else if (isProfileActive) {
+                                    onClick = {
+                                        if (isProfileActive) {
                                             TunnelServiceController.stop(context)
+                                        } else {
+                                            requestConnect(profile, routingProfile)
                                         }
                                     },
-                                )
+                                    modifier = Modifier.semantics {
+                                        contentDescription = "$connectionActionLabel ${profile.name}"
+                                    },
+                                ) {
+                                    Text(connectionActionLabel)
+                                }
                             }
                             Spacer(modifier = Modifier.height(10.dp))
                             InfoChipRow(
                                 labels = buildList {
                                     profileHealthChipLabel(healthCheck)?.let(::add)
+                                    profileLastCheckChipLabel(healthCheck)?.let(::add)
                                     add(routingProfile.mode.label())
                                     add(routingProfile.dnsMode.label())
                                     add("${routingProfile.rules.size} rules")
@@ -238,7 +243,9 @@ private fun ThemeSwitchAction(
             onCheckedChange = { enabled ->
                 onThemeModeChange(if (enabled) ThemeMode.DARK else ThemeMode.LIGHT)
             },
-            modifier = Modifier.scale(0.8f),
+            modifier = Modifier
+                .scale(0.8f)
+                .semantics { contentDescription = "Toggle dark theme" },
             thumbContent = null,
             colors = SwitchDefaults.colors(
                 checkedTrackColor = MaterialTheme.colorScheme.primary,

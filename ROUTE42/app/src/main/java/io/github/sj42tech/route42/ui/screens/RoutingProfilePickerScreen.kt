@@ -2,21 +2,13 @@ package io.github.sj42tech.route42.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -26,8 +18,9 @@ import io.github.sj42tech.route42.model.RoutingProfile
 import io.github.sj42tech.route42.model.RoutingPreset
 import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.ui.components.InfoChipRow
+import io.github.sj42tech.route42.ui.components.Route42Scaffold
+import io.github.sj42tech.route42.ui.components.Route42ScreenList
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun RoutingProfilePickerScreen(
     profile: ConnectionProfile,
@@ -40,25 +33,11 @@ internal fun RoutingProfilePickerScreen(
     onCreateRuLocalRoutingProfile: () -> Unit,
     onOpenCurrentRoutes: () -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Routing Profile") },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text("Back")
-                    }
-                },
-            )
-        },
+    Route42Scaffold(
+        title = "Routing Profile",
+        onBack = onBack,
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+        Route42ScreenList(innerPadding = padding) {
             item {
                 OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                     Column(
@@ -128,7 +107,7 @@ internal fun RoutingProfilePickerScreen(
                             fontWeight = FontWeight.SemiBold,
                         )
                         Text(
-                            text = "You can reuse one routing profile across multiple VPS connections and switch this connection to any saved routing profile below.",
+                            text = "Reuse one routing profile across several VPS connections, or create a private copy when you want edits to affect only this connection.",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }

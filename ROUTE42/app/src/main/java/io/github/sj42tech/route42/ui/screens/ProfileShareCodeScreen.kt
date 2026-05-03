@@ -1,22 +1,13 @@
 package io.github.sj42tech.route42.ui.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -30,8 +21,9 @@ import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.parser.VlessLinkShareCodec
 import io.github.sj42tech.route42.ui.DataMatrixBitmapFactory
 import io.github.sj42tech.route42.ui.components.InfoChipRow
+import io.github.sj42tech.route42.ui.components.Route42Scaffold
+import io.github.sj42tech.route42.ui.components.Route42ScreenList
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ProfileShareCodeScreen(
     profile: ConnectionProfile,
@@ -54,25 +46,11 @@ internal fun ProfileShareCodeScreen(
     val bitmap = bitmapResult?.getOrNull()
     val errorMessage = exportResult.exceptionOrNull()?.message ?: bitmapResult?.exceptionOrNull()?.message
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Show Code") },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text("Back")
-                    }
-                },
-            )
-        },
+    Route42Scaffold(
+        title = "Show Code",
+        onBack = onBack,
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+        Route42ScreenList(innerPadding = padding) {
             item {
                 OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -81,17 +59,17 @@ internal fun ProfileShareCodeScreen(
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Scan this code in Route42 on another device to import the same connection.",
                             style = MaterialTheme.typography.bodyMedium,
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "The code contains the current endpoint settings, Route42 routing mode, DNS mode, preset, and enabled custom routes.",
                             style = MaterialTheme.typography.bodySmall,
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
                         InfoChipRow(
                             labels = buildList {
                                 add(routingProfile.mode.label())
@@ -114,7 +92,7 @@ internal fun ProfileShareCodeScreen(
                                 contentDescription = "Share code for ${profile.name}",
                                 modifier = Modifier.fillMaxWidth(),
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
+                            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
                             Text(
                                 text = "Tip: keep the code centered in the other phone's camera view.",
                                 style = MaterialTheme.typography.bodySmall,
