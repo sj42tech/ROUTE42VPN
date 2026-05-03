@@ -61,7 +61,7 @@ This applies to:
 - Do not stop, restart, unload, or disable `local.xray` while a working desktop tunnel is active unless the user gives an explicit instruction to do that.
 - Do not disable macOS system proxy settings while the live desktop tunnel is considered working unless the user explicitly requests that action.
 - Provider and path diagnostics should be run as direct no-proxy checks that bypass the current tunnel while leaving the active `xray` session untouched.
-- For direct provider checks from the laptop without touching the live tunnel, use [diagnose-direct-provider-path.sh](/Users/sergeibystrov/PROJECTS/test/VPNCLIENT/SJLABORATORY/ops/diagnose-direct-provider-path.sh).
+- For direct provider checks from the laptop without touching the live tunnel, use [diagnose-direct-provider-path.sh](../SJLABORATORY/ops/diagnose-direct-provider-path.sh).
 
 ## Project At A Glance
 
@@ -82,6 +82,7 @@ This applies to:
 - [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
 - [docs/github-repository-metadata.md](docs/github-repository-metadata.md)
 - [docs/android-vless-client-overview.md](docs/android-vless-client-overview.md)
+- [docs/agent-workflow.md](docs/agent-workflow.md)
 - [docs/github-release-signing.md](docs/github-release-signing.md)
 - [docs/use-your-own-vps-on-android.md](docs/use-your-own-vps-on-android.md)
 - [docs/import-vless-links-on-android.md](docs/import-vless-links-on-android.md)

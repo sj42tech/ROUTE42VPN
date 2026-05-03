@@ -27,3 +27,7 @@
 /SJLABORATORY/secrets/
 /SJLABORATORY/logs/
 /secrets/
+/EXHALATION/deploy/pi-noip/stack.env
+/EXHALATION/deploy/pi-lan-https/stack.env
+/EXHALATION/deploy/pi-lan-https/caddy-data/
+/EXHALATION/deploy/pi-lan-https/caddy-config/
