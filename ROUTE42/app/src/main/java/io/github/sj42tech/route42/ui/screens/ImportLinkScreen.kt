@@ -3,21 +3,13 @@ package io.github.sj42tech.route42.ui.screens
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +19,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
@@ -36,10 +30,11 @@ import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
 import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.parser.VlessLinkParser
 import io.github.sj42tech.route42.ui.components.InfoChipRow
+import io.github.sj42tech.route42.ui.components.Route42Scaffold
+import io.github.sj42tech.route42.ui.components.Route42ScreenList
 import io.github.sj42tech.route42.ui.endpointConnectionSummary
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ImportLinkScreen(
     onBack: () -> Unit,
@@ -72,25 +67,11 @@ internal fun ImportLinkScreen(
         },
     )
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Import Link") },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text("Back")
-                    }
-                },
-            )
-        },
+    Route42Scaffold(
+        title = "Import Link",
+        onBack = onBack,
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+        Route42ScreenList(innerPadding = padding) {
             item {
                 OutlinedTextField(
                     value = linkText,
@@ -109,7 +90,9 @@ internal fun ImportLinkScreen(
                         scannerError = null
                         scanCode()
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics { contentDescription = "Scan Data Matrix or QR code" },
                 ) {
                     Text("Scan Code")
                 }
@@ -158,7 +141,9 @@ internal fun ImportLinkScreen(
                                 onSave(parsedProfile)
                             }
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics { contentDescription = "Save imported profile" },
                     ) {
                         Text("Save Profile")
                     }

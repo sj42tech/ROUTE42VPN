@@ -2,19 +2,12 @@ package io.github.sj42tech.route42.ui.screens
 
 import io.github.sj42tech.route42.config.builtInPresetSummaryLines
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -26,8 +19,9 @@ import io.github.sj42tech.route42.model.RoutingPreset
 import io.github.sj42tech.route42.model.RoutingRule
 import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.ui.components.RuleEditorCard
+import io.github.sj42tech.route42.ui.components.Route42Scaffold
+import io.github.sj42tech.route42.ui.components.Route42ScreenList
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun RoutingEditorScreen(
     profile: ConnectionProfile,
@@ -38,25 +32,11 @@ internal fun RoutingEditorScreen(
     onUpdateRule: (RoutingRule) -> Unit,
     onDeleteRule: (String) -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Routes") },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text("Back")
-                    }
-                },
-            )
-        },
+    Route42Scaffold(
+        title = "Routes",
+        onBack = onBack,
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+        Route42ScreenList(innerPadding = padding) {
             item {
                 OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                     androidx.compose.foundation.layout.Column(modifier = Modifier.padding(16.dp)) {
@@ -121,17 +101,22 @@ internal fun RoutingEditorScreen(
                             fontWeight = FontWeight.SemiBold,
                         )
                         androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 12.dp))
+                        Text(
+                            text = "Direct bypasses VPN, Proxy forces VPN, and Block rejects matching traffic.",
+                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                        )
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 12.dp))
                         androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(onClick = { onAddRule(RoutingAction.DIRECT) }) {
-                                Text("Direct site")
+                                Text("Add Direct")
                             }
                             Button(onClick = { onAddRule(RoutingAction.PROXY) }) {
-                                Text("Proxy site")
+                                Text("Add Proxy")
                             }
                         }
                         androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 8.dp))
                         Button(onClick = { onAddRule(RoutingAction.BLOCK) }) {
-                            Text("Block site")
+                            Text("Add Block")
                         }
                     }
                 }

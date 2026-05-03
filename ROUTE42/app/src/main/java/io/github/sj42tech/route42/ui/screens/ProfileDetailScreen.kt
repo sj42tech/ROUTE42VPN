@@ -1,24 +1,18 @@
 package io.github.sj42tech.route42.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,9 +30,10 @@ import io.github.sj42tech.route42.ui.rememberTunnelConnectAction
 import io.github.sj42tech.route42.ui.endpointConnectionSummary
 import io.github.sj42tech.route42.ui.components.OptionSelector
 import io.github.sj42tech.route42.ui.components.ProfileHealthCheckCard
+import io.github.sj42tech.route42.ui.components.Route42Scaffold
+import io.github.sj42tech.route42.ui.components.Route42ScreenList
 import io.github.sj42tech.route42.ui.components.TunnelStatusCard
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ProfileDetailScreen(
     profile: ConnectionProfile,
@@ -71,25 +66,11 @@ internal fun ProfileDetailScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(profile.name) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text("Back")
-                    }
-                },
-            )
-        },
+    Route42Scaffold(
+        title = profile.name,
+        onBack = onBack,
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+        Route42ScreenList(innerPadding = padding) {
             item {
                 OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -109,7 +90,15 @@ internal fun ProfileDetailScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                         Button(
                             onClick = ::toggleConnection,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .semantics {
+                                    contentDescription = if (isRunningForProfile) {
+                                        "Disconnect ${profile.name}"
+                                    } else {
+                                        "Connect ${profile.name}"
+                                    }
+                                },
                         ) {
                             Text(
                                 when {
@@ -123,7 +112,9 @@ internal fun ProfileDetailScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                         Button(
                             onClick = onOpenShareCode,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .semantics { contentDescription = "Show share code for ${profile.name}" },
                         ) {
                             Text("Show Code")
                         }
