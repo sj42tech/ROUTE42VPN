@@ -27,3 +27,7 @@
 /ignored-local-storage/secrets/
 /ignored-local-storage/logs/
 /secrets/
+/ignored-local-storage/deploy/pi-noip/stack.env
+/ignored-local-storage/deploy/pi-lan-https/stack.env
+/ignored-local-storage/deploy/pi-lan-https/caddy-data/
+/ignored-local-storage/deploy/pi-lan-https/caddy-config/

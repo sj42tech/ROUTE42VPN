@@ -104,3 +104,17 @@ These checks define the release readiness baseline for Route42.
 
 - Route42 is ready for the first public commit and push when the required green checks and repository state rules are satisfied.
 - Route42 is ready for the first tagged GitHub Release only when the signing secrets are configured and the signed release APK path is verified end-to-end.
+
+## 11. Agent Android Workflow
+
+Before starting Android platform, build, emulator, UI, permission, release, or SDK-related work, review [docs/agent-workflow.md](docs/agent-workflow.md).
+
+The required pre-task check is:
+
+- verify whether the official Android CLI is available locally;
+- prefer official Android agent guidance and Android Knowledge Base material for Android platform decisions;
+- use the project-local Android Skills under `skills/` when they are available for the task area, especially Android CLI, R8, edge-to-edge, AGP, Compose, and navigation work;
+- keep the existing Gradle, emulator, and ADB commands as the fallback when Android CLI preview tooling is unavailable;
+- treat `VpnService`, foreground service behavior, permissions, target SDK, release signing, and emulator setup as documentation-sensitive areas that require current Android guidance before code changes.
+
+Android CLI is preview tooling. It may be used for local emulator start and APK install workflows, but do not make release CI depend on it until it has been proven stable for Route42.

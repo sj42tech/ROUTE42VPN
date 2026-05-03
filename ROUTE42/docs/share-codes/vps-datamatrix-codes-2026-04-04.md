@@ -31,7 +31,7 @@ example-profile-datamatrix.png	vless://11111111-2222-4333-8444-555555555555@203.
 
 ## Rendering Helper
 
-Use [RenderVpsDataMatrix.java](local-workspace) with:
+Use [RenderVpsDataMatrix.java](../../tools/RenderVpsDataMatrix.java) with:
 
 - a local manifest path as the first argument;
 - an optional output directory as the second argument.
