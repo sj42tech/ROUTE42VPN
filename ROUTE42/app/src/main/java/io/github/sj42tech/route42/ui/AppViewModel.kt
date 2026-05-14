@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import io.github.sj42tech.route42.data.ProfilesRepository
 import io.github.sj42tech.route42.data.ProfilesRecoveryNotice
 import io.github.sj42tech.route42.config.SingBoxConfigGenerator
+import io.github.sj42tech.route42.model.AppRoutingMode
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
 import io.github.sj42tech.route42.model.DnsMode
@@ -97,6 +98,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun setDnsMode(profileId: String, dnsMode: DnsMode) {
         viewModelScope.launch {
             repository.setDnsMode(profileId, dnsMode)
+        }
+    }
+
+    fun setAppRoutingMode(profileId: String, appRoutingMode: AppRoutingMode) {
+        viewModelScope.launch {
+            repository.setAppRoutingMode(profileId, appRoutingMode)
+        }
+    }
+
+    fun setAppPackageSelected(profileId: String, packageName: String, selected: Boolean) {
+        viewModelScope.launch {
+            repository.setAppPackageSelected(profileId, packageName, selected)
         }
     }
 

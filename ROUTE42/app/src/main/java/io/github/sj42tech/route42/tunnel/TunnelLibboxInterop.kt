@@ -66,10 +66,18 @@ internal fun configureTunBuilder(
         }
     }
 
-    options.includePackage.forEach { packageName ->
+    val includePackages = options.includePackage.toList()
+    var allowedPackageCount = 0
+    includePackages.forEach { packageName ->
         runCatching { builder.addAllowedApplication(packageName) }
-            .onSuccess { log("allowed app: $packageName") }
+            .onSuccess {
+                allowedPackageCount += 1
+                log("allowed app: $packageName")
+            }
             .onFailure { log("allow app failed: $packageName (${it.message})") }
+    }
+    if (includePackages.isNotEmpty() && allowedPackageCount == 0) {
+        error("No selected VPN apps could be added to Android VPN")
     }
     options.excludePackage.forEach { packageName ->
         runCatching { builder.addDisallowedApplication(packageName) }

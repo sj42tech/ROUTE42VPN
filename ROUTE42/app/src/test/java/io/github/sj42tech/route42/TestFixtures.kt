@@ -4,6 +4,7 @@ import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
 import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.EndpointConfig
+import io.github.sj42tech.route42.model.AppRoutingMode
 import io.github.sj42tech.route42.model.MatchType
 import io.github.sj42tech.route42.model.RoutingAction
 import io.github.sj42tech.route42.model.RoutingMode
@@ -36,6 +37,8 @@ object TestFixtures {
         preset: RoutingPreset = RoutingPreset.NONE,
         routingMode: RoutingMode = RoutingMode.RULE,
         dnsMode: DnsMode = DnsMode.SPLIT,
+        appRoutingMode: AppRoutingMode = AppRoutingMode.ALL_APPS,
+        selectedAppPackages: List<String> = emptyList(),
         rules: List<RoutingRule> = listOf(
             RoutingRule(
                 action = RoutingAction.DIRECT,
@@ -53,6 +56,8 @@ object TestFixtures {
         preset = preset,
         mode = routingMode,
         dnsMode = dnsMode,
+        appRoutingMode = appRoutingMode,
+        selectedAppPackages = selectedAppPackages,
         rules = rules,
     )
 
@@ -60,6 +65,8 @@ object TestFixtures {
         preset: RoutingPreset = RoutingPreset.NONE,
         routingMode: RoutingMode = RoutingMode.RULE,
         dnsMode: DnsMode = DnsMode.SPLIT,
+        appRoutingMode: AppRoutingMode = AppRoutingMode.ALL_APPS,
+        selectedAppPackages: List<String> = emptyList(),
         endpoint: EndpointConfig = sampleEndpoint(),
         rules: List<RoutingRule> = listOf(
             RoutingRule(
@@ -81,6 +88,8 @@ object TestFixtures {
                 preset = preset,
                 routingMode = routingMode,
                 dnsMode = dnsMode,
+                appRoutingMode = appRoutingMode,
+                selectedAppPackages = selectedAppPackages,
                 rules = rules,
             ).copy(id = profile.routingProfileId),
         )

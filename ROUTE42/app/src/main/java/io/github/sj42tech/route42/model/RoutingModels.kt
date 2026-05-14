@@ -10,6 +10,8 @@ data class RoutingProfile(
     val preset: RoutingPreset = RoutingPreset.NONE,
     val mode: RoutingMode = RoutingMode.PROXY,
     val dnsMode: DnsMode = mode.defaultDnsMode(),
+    val appRoutingMode: AppRoutingMode = AppRoutingMode.ALL_APPS,
+    val selectedAppPackages: List<String> = emptyList(),
     val rules: List<RoutingRule> = emptyList(),
 ) {
     companion object {
@@ -40,6 +42,12 @@ enum class DnsMode {
     LOCAL,
     PROXY,
     SPLIT,
+}
+
+@Serializable
+enum class AppRoutingMode {
+    ALL_APPS,
+    ONLY_SELECTED_APPS,
 }
 
 @Serializable

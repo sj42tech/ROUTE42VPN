@@ -17,6 +17,11 @@ fun DnsMode.label(): String = when (this) {
     DnsMode.SPLIT -> "Split DNS"
 }
 
+fun AppRoutingMode.label(): String = when (this) {
+    AppRoutingMode.ALL_APPS -> "All apps"
+    AppRoutingMode.ONLY_SELECTED_APPS -> "Only selected apps"
+}
+
 fun RoutingAction.label(): String = when (this) {
     RoutingAction.DIRECT -> "Direct"
     RoutingAction.PROXY -> "Proxy"

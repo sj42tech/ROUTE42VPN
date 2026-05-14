@@ -281,7 +281,7 @@ Always added:
 Added only when the assigned routing profile uses `Rule (RU + Local)`:
 
 - direct routing for `.ru`, `.su`, `xn--p1ai`, `xn--d1acj3b`, `xn--80adxhks`, and `xn--p1acf`;
-- direct routing for the bundled domestic direct domains such as `yandex.ru`, `vk.com`, `mail.ru`, `rutube.ru`, `wildberries.ru`, and `ozon.ru`;
+- direct routing for the bundled domestic and commerce helper domains such as `dns-shop.ru`, `vchecks.me`, `yandexcloud.net`, `yastatic.net`, `yandex.ru`, `vk.com`, `mail.ru`, `wildberries.ru`, and `ozon.ru`;
 - direct `geoip-ru` matching through a local binary sing-box `rule_set`.
 
 This means you do not need to duplicate local safety rules in every link, and you can move several VPS profiles onto one shared `RU + Local` preset instead of copy-pasting those domains by hand.

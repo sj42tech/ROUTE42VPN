@@ -135,7 +135,7 @@ That preset adds:
 - local and special-use direct CIDRs;
 - `localhost`, `.local`, and `.home.arpa` direct handling;
 - RU-oriented direct suffixes;
-- curated domestic direct domains;
+- curated domestic and commerce helper direct domains;
 - `geoip-ru` through a local binary sing-box `rule_set`.
 
 ## Example With Routing Parameters

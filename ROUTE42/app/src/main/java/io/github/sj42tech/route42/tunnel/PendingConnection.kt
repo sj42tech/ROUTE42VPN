@@ -4,4 +4,5 @@ internal data class PendingConnection(
     val profileId: String,
     val profileName: String,
     val config: String,
+    val onlySelectedAppsUseVpn: Boolean,
 )

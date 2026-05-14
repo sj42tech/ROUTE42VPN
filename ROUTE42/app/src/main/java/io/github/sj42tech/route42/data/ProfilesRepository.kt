@@ -7,6 +7,7 @@ import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
 import io.github.sj42tech.route42.model.DnsMode
+import io.github.sj42tech.route42.model.AppRoutingMode
 import io.github.sj42tech.route42.model.ProfilesSnapshot
 import io.github.sj42tech.route42.model.RoutingMode
 import io.github.sj42tech.route42.model.RoutingProfile
@@ -135,6 +136,29 @@ class ProfilesRepository(private val context: Context) {
         }
     }
 
+    suspend fun setAppRoutingMode(profileId: String, appRoutingMode: AppRoutingMode) {
+        updateRoutingProfile(profileId) { routingProfile ->
+            routingProfile.copy(appRoutingMode = appRoutingMode)
+        }
+    }
+
+    suspend fun setSelectedAppPackages(profileId: String, selectedAppPackages: List<String>) {
+        updateRoutingProfile(profileId) { routingProfile ->
+            routingProfile.copy(selectedAppPackages = selectedAppPackages.normalizedPackageNames())
+        }
+    }
+
+    suspend fun setAppPackageSelected(profileId: String, packageName: String, selected: Boolean) {
+        updateRoutingProfile(profileId) { routingProfile ->
+            val updated = if (selected) {
+                routingProfile.selectedAppPackages + packageName
+            } else {
+                routingProfile.selectedAppPackages - packageName
+            }
+            routingProfile.copy(selectedAppPackages = updated.normalizedPackageNames())
+        }
+    }
+
     suspend fun addRule(profileId: String, rule: RoutingRule) {
         updateRoutingProfile(profileId) { routingProfile ->
             routingProfile.copy(rules = routingProfile.rules + rule)
@@ -214,4 +238,10 @@ class ProfilesRepository(private val context: Context) {
         }
         return "$baseName $suffix"
     }
+
+    private fun List<String>.normalizedPackageNames(): List<String> =
+        map(String::trim)
+            .filter(String::isNotBlank)
+            .distinct()
+            .sorted()
 }

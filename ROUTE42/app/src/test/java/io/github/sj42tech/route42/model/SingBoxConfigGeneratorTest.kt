@@ -148,7 +148,7 @@ class SingBoxConfigGeneratorTest {
             })
             assertTrue(routeRules.any { rule ->
                 rule["domain_suffix"]?.jsonArray?.map { it.jsonPrimitive.content }?.containsAll(
-                    listOf("yandex.ru", "vk.com", "ozon.ru"),
+                    listOf("dns-shop.ru", "vchecks.me", "yandexcloud.net", "yastatic.net", "vk.com", "ozon.ru"),
                 ) == true
             })
             assertTrue(routeRules.any { rule ->
@@ -178,12 +178,41 @@ class SingBoxConfigGeneratorTest {
             })
             assertTrue(dnsRules.any { rule ->
                 rule["domain_suffix"]?.jsonArray?.map { it.jsonPrimitive.content }?.containsAll(
-                    listOf("yandex.ru", "vk.com", "rambler.ru"),
+                    listOf("dns-shop.ru", "vchecks.me", "yandex.net", "yastatic.net", "vk.com", "rambler.ru"),
                 ) == true
             })
         } finally {
             RoutingPresetRuleSetFiles.ruGeoipRuleSetPathProvider = previousProvider
         }
+    }
+
+    @Test
+    fun `limits tun inbound to selected android packages`() {
+        val profile = TestFixtures.sampleResolvedProfile(
+            appRoutingMode = AppRoutingMode.ONLY_SELECTED_APPS,
+            selectedAppPackages = listOf("org.telegram.messenger", "com.google.android.youtube"),
+        )
+
+        val tunInbound = tunInbound(profile)
+
+        assertEquals(
+            listOf("org.telegram.messenger", "com.google.android.youtube"),
+            tunInbound["include_package"]?.jsonArray?.map { it.jsonPrimitive.content },
+        )
+    }
+
+    @Test
+    fun `rejects only selected apps mode without selected packages`() {
+        val profile = TestFixtures.sampleResolvedProfile(
+            appRoutingMode = AppRoutingMode.ONLY_SELECTED_APPS,
+            selectedAppPackages = emptyList(),
+        )
+
+        val error = assertFailsWith<IllegalArgumentException> {
+            SingBoxConfigGenerator.generate(profile)
+        }
+
+        assertEquals(SingBoxConfigGenerator.EmptySelectedAppsMessage, error.message)
     }
 
     @Test
@@ -217,4 +246,12 @@ class SingBoxConfigGeneratorTest {
 
     private fun proxyTransport(profile: io.github.sj42tech.route42.model.ConnectionProfileWithRouting) =
         proxyOutbound(profile)["transport"]?.jsonObject ?: error("Missing transport block")
+
+    private fun tunInbound(profile: io.github.sj42tech.route42.model.ConnectionProfileWithRouting) =
+        Json.parseToJsonElement(SingBoxConfigGenerator.generate(profile))
+            .jsonObject["inbounds"]
+            ?.jsonArray
+            ?.map { it.jsonObject }
+            ?.first { inbound -> inbound["tag"]?.jsonPrimitive?.content == "tun-in" }
+            ?: error("Missing tun inbound")
 }

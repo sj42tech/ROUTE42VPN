@@ -53,6 +53,7 @@ class TunnelService : VpnService(), PlatformInterface, CommandServerHandler {
     private var currentProfileId: String? = null
     private var currentProfileName: String? = null
     private var currentConfig: String? = null
+    private var currentOnlySelectedAppsUseVpn: Boolean = false
     private var pendingConnection: PendingConnection? = null
     private val connectRequestMutex = Mutex()
     @Volatile
@@ -74,6 +75,7 @@ class TunnelService : VpnService(), PlatformInterface, CommandServerHandler {
                         profileId = profileId,
                         profileName = profileName,
                         config = config,
+                        onlySelectedAppsUseVpn = TunnelServiceController.readOnlySelectedAppsUseVpn(intent),
                     )
                     serviceScope.launch {
                         connectRequestMutex.withLock {
@@ -133,15 +135,22 @@ class TunnelService : VpnService(), PlatformInterface, CommandServerHandler {
             profileId = request.profileId,
             profileName = request.profileName,
             config = request.config,
+            onlySelectedAppsUseVpn = request.onlySelectedAppsUseVpn,
         )
     }
 
-    private suspend fun startTunnel(profileId: String, profileName: String, config: String) {
+    private suspend fun startTunnel(
+        profileId: String,
+        profileName: String,
+        config: String,
+        onlySelectedAppsUseVpn: Boolean,
+    ) {
         if (stopping) return
         TunnelRuntime.setStarting(profileId, profileName)
         currentProfileId = profileId
         currentProfileName = profileName
         currentConfig = config
+        currentOnlySelectedAppsUseVpn = onlySelectedAppsUseVpn
         resolverNetworkController.start()
         resolverNetworkController.bindProcess()
 
@@ -167,9 +176,11 @@ class TunnelService : VpnService(), PlatformInterface, CommandServerHandler {
                 config,
                 OverrideOptions().apply {
                     autoRedirect = false
-                    // Exclude the VPN app itself so libbox control and outbound sockets
-                    // reach the upstream network directly instead of re-entering the TUN.
-                    excludePackage = SimpleStringIterator(listOf(packageName))
+                    if (!onlySelectedAppsUseVpn) {
+                        // Exclude the VPN app itself so libbox control and outbound sockets
+                        // reach the upstream network directly instead of re-entering the TUN.
+                        excludePackage = SimpleStringIterator(listOf(packageName))
+                    }
                 },
             )
             TunnelRuntime.setRunning(profileId, profileName)
@@ -208,6 +219,7 @@ class TunnelService : VpnService(), PlatformInterface, CommandServerHandler {
             currentProfileId = null
             currentProfileName = null
             currentConfig = null
+            currentOnlySelectedAppsUseVpn = false
             val nextConnection = pendingConnection
             pendingConnection = null
             runCatching {
@@ -241,6 +253,7 @@ class TunnelService : VpnService(), PlatformInterface, CommandServerHandler {
                         profileId = profileId,
                         profileName = profileName,
                         config = config,
+                        onlySelectedAppsUseVpn = currentOnlySelectedAppsUseVpn,
                     ),
                 )
             }

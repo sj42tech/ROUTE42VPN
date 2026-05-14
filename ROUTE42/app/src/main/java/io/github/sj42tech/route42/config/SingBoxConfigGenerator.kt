@@ -2,6 +2,7 @@ package io.github.sj42tech.route42.config
 
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
+import io.github.sj42tech.route42.model.AppRoutingMode
 import io.github.sj42tech.route42.model.RoutingProfile
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -12,6 +13,7 @@ import kotlinx.serialization.json.put
 object SingBoxConfigGenerator {
     const val LocalProbeSocksTag = "app-socks"
     const val LocalProbeSocksPort = 39080
+    const val EmptySelectedAppsMessage = "Select at least one app for Only selected apps use VPN"
 
     @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
     private val JsonFormatter = Json {
@@ -23,16 +25,25 @@ object SingBoxConfigGenerator {
         generate(profile.profile, profile.routingProfile)
 
     fun generate(profile: ConnectionProfile, routingProfile: RoutingProfile): String {
+        validateAppRouting(routingProfile)
         val config = buildJsonObject {
             put("log", buildJsonObject {
                 put("level", "info")
             })
             put("dns", buildDnsConfig(profile, routingProfile))
-            put("inbounds", buildInbounds(profile))
+            put("inbounds", buildInbounds(profile, routingProfile))
             put("outbounds", buildOutbounds(profile))
             put("route", buildRouteConfig(profile, routingProfile))
         }
 
         return JsonFormatter.encodeToString(JsonObject.serializer(), config)
+    }
+
+    private fun validateAppRouting(routingProfile: RoutingProfile) {
+        if (routingProfile.appRoutingMode == AppRoutingMode.ONLY_SELECTED_APPS &&
+            routingProfile.selectedAppPackages.isEmpty()
+        ) {
+            throw IllegalArgumentException(EmptySelectedAppsMessage)
+        }
     }
 }

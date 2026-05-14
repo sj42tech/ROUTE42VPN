@@ -16,9 +16,12 @@ Route42 stores routing as reusable app-level profile data and generates a compat
 Current routing model:
 
 - one `ConnectionProfile` stores the VPS endpoint and transport settings;
-- one `RoutingProfile` stores routing mode, DNS mode, imported rules, and manual rules;
+- one `RoutingProfile` stores routing mode, DNS mode, app scope, imported rules, and manual rules;
 - one routing profile can be reused by several saved VPS profiles;
-- the built-in `Rule (RU + Local)` preset adds local safety rules, RU-oriented suffix defaults, curated domestic direct domains, and `geoip-ru` through a local sing-box `rule_set`.
+- the built-in `Rule (RU + Local)` preset adds local safety rules, RU-oriented suffix defaults, curated domestic/commerce helper domains, and `geoip-ru` through a local sing-box `rule_set`;
+- app scope can either allow all apps to enter the VPN or limit the VPN to selected Android packages with sing-box `include_package`.
+
+`Only selected apps use VPN` is the recommended compatibility mode when banking, marketplace, government, or anti-bot-heavy apps should stay on the phone's normal network path while specific apps such as a browser, Telegram, or YouTube use the tunnel. If this mode is enabled, at least one app must be selected before Route42 will start the tunnel.
 
 For the exact parameter model and examples, see:
 

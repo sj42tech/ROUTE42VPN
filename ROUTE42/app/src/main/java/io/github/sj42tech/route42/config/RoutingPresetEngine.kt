@@ -41,9 +41,14 @@ private val RuDomainSuffixes = listOf(
 )
 
 private val DomesticDirectDomains = listOf(
+    "dns-shop.ru",
+    "vchecks.me",
     "yandex.ru",
     "ya.ru",
     "yandex.com",
+    "yandex.net",
+    "yandexcloud.net",
+    "yastatic.net",
     "vk.com",
     "vk.me",
     "mail.ru",
@@ -62,7 +67,7 @@ private val RuLocalPresetSummaryLines = listOf(
     "Local and special-use IPv4/IPv6 CIDRs route direct.",
     "localhost, .local, and .home.arpa stay on direct DNS and direct routing.",
     "RU-oriented suffixes (.ru, .su, xn--p1ai, xn--d1acj3b, xn--80adxhks, xn--p1acf) route direct.",
-    "Domestic direct bundle (Yandex, VK, Mail.ru, Rutube, Ozon, Wildberries, and others) routes direct.",
+    "Domestic and commerce helper bundle (DNS Shop, QRator helpers, Yandex, VK, Mail.ru, Ozon, Wildberries, and others) routes direct.",
     "geoip-ru is applied through a local binary rule-set when available.",
 )
 

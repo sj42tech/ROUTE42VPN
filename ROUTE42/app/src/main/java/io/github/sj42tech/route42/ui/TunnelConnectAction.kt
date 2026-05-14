@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import io.github.sj42tech.route42.config.SingBoxConfigGenerator
+import io.github.sj42tech.route42.model.AppRoutingMode
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.RoutingProfile
 import io.github.sj42tech.route42.tunnel.TunnelRuntime
@@ -57,5 +58,6 @@ private fun startTunnel(
         profileId = profile.id,
         profileName = profile.name,
         config = config,
+        onlySelectedAppsUseVpn = routingProfile.appRoutingMode == AppRoutingMode.ONLY_SELECTED_APPS,
     )
 }

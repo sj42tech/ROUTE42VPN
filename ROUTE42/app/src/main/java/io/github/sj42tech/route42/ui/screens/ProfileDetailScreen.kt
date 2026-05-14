@@ -46,6 +46,7 @@ internal fun ProfileDetailScreen(
     onRunHealthCheck: () -> Unit,
     onOpenShareCode: () -> Unit,
     onManageRoutingProfile: () -> Unit,
+    onOpenAppRouting: () -> Unit,
     onOpenRoutes: () -> Unit,
 ) {
     val tunnelState = TunnelRuntime.state.collectAsStateWithLifecycle().value
@@ -185,6 +186,28 @@ internal fun ProfileDetailScreen(
                         ) {
                             Text("Edit Routes (${routingProfile.rules.size})")
                         }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "App scope",
+                            style = androidx.compose.material3.MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = routingProfile.appRoutingMode.label(),
+                            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                        )
+                        Text(
+                            text = appRoutingSummary(routingProfile),
+                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            onClick = onOpenAppRouting,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text("Choose Apps")
+                        }
                     }
                 }
             }
@@ -216,3 +239,15 @@ internal fun ProfileDetailScreen(
         }
     }
 }
+
+private fun appRoutingSummary(routingProfile: RoutingProfile): String =
+    when (routingProfile.appRoutingMode) {
+        io.github.sj42tech.route42.model.AppRoutingMode.ALL_APPS ->
+            "Every app can enter the VPN; domain rules decide direct or proxy path."
+        io.github.sj42tech.route42.model.AppRoutingMode.ONLY_SELECTED_APPS ->
+            if (routingProfile.selectedAppPackages.isEmpty()) {
+                "No selected apps yet."
+            } else {
+                "${routingProfile.selectedAppPackages.size} selected apps."
+            }
+    }

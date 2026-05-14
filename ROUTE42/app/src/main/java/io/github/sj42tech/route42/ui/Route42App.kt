@@ -14,6 +14,7 @@ import io.github.sj42tech.route42.model.isDarkTheme
 import io.github.sj42tech.route42.model.migrated
 import io.github.sj42tech.route42.model.profilesUsingRoutingProfile
 import io.github.sj42tech.route42.model.routingProfileFor
+import io.github.sj42tech.route42.ui.screens.AppRoutingScreen
 import io.github.sj42tech.route42.ui.screens.ImportLinkScreen
 import io.github.sj42tech.route42.ui.screens.MissingProfileScreen
 import io.github.sj42tech.route42.ui.screens.ProfileDetailScreen
@@ -31,6 +32,7 @@ private object AppRoute {
     const val ProfileDetails = "profile/{profileId}"
     const val ProfileRoutes = "profile/{profileId}/routes"
     const val ProfileRoutingProfile = "profile/{profileId}/routing-profile"
+    const val ProfileAppRouting = "profile/{profileId}/app-routing"
     const val ProfileShareCode = "profile/{profileId}/show-code"
 
     fun details(profileId: String): String = "profile/$profileId"
@@ -38,6 +40,8 @@ private object AppRoute {
     fun routes(profileId: String): String = "profile/$profileId/routes"
 
     fun routingProfile(profileId: String): String = "profile/$profileId/routing-profile"
+
+    fun appRouting(profileId: String): String = "profile/$profileId/app-routing"
 
     fun shareCode(profileId: String): String = "profile/$profileId/show-code"
 }
@@ -104,6 +108,7 @@ fun Route42App(viewModel: AppViewModel) {
                             onRunHealthCheck = { viewModel.runProfileHealthCheck(profile, routingProfile) },
                             onOpenShareCode = { navController.navigate(AppRoute.shareCode(profile.id)) },
                             onManageRoutingProfile = { navController.navigate(AppRoute.routingProfile(profile.id)) },
+                            onOpenAppRouting = { navController.navigate(AppRoute.appRouting(profile.id)) },
                             onOpenRoutes = { navController.navigate(AppRoute.routes(profile.id)) },
                         )
                     }
@@ -144,6 +149,28 @@ fun Route42App(viewModel: AppViewModel) {
                             onAddRule = { action -> viewModel.addRule(profile.id, action) },
                             onUpdateRule = { viewModel.updateRule(profile.id, it) },
                             onDeleteRule = { viewModel.deleteRule(profile.id, it) },
+                        )
+                    }
+                }
+                composable(
+                    route = AppRoute.ProfileAppRouting,
+                    arguments = listOf(navArgument("profileId") { type = NavType.StringType }),
+                ) { backStackEntry ->
+                    val profileId = checkNotNull(backStackEntry.arguments?.getString("profileId"))
+                    val profile = migratedSnapshot.profiles.firstOrNull { it.id == profileId }
+
+                    if (profile == null) {
+                        MissingProfileScreen(onBack = { navController.popBackStack() })
+                    } else {
+                        val routingProfile = migratedSnapshot.routingProfileFor(profile)
+                        AppRoutingScreen(
+                            routingProfile = routingProfile,
+                            routingUsageCount = migratedSnapshot.profilesUsingRoutingProfile(routingProfile.id).size,
+                            onBack = { navController.popBackStack() },
+                            onAppRoutingModeSelected = { viewModel.setAppRoutingMode(profile.id, it) },
+                            onAppPackageSelected = { packageName, selected ->
+                                viewModel.setAppPackageSelected(profile.id, packageName, selected)
+                            },
                         )
                     }
                 }
