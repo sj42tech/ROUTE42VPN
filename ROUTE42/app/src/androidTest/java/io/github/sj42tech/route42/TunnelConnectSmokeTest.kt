@@ -104,6 +104,7 @@ class TunnelConnectSmokeTest {
     private fun importProfile(link: String) {
         composeRule.onNodeWithText("Import").assertIsDisplayed().performClick()
         composeRule.onNode(hasSetTextAction()).performTextInput(link)
+        composeRule.onNode(hasScrollAction()).performScrollToNode(hasText("Save Profile"))
         composeRule.onNodeWithText("Save Profile").assertIsDisplayed().performClick()
         composeRule.waitUntil(timeoutMillis = 10_000) {
             runCatching { composeRule.onNodeWithText("Connect").assertIsDisplayed() }.isSuccess
