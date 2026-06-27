@@ -1,6 +1,7 @@
 package io.github.sj42tech.route42.parser
 
 import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
+import io.github.sj42tech.route42.model.AppRoutingMode
 import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.MatchType
 import io.github.sj42tech.route42.model.RoutingAction
@@ -46,6 +47,12 @@ object VlessLinkShareCodec {
         }
         addValue(VlessLinkKeys.Mode, profile.routingProfile.mode.queryValue())
         addValue(VlessLinkKeys.Dns, profile.routingProfile.dnsMode.queryValue())
+        if (profile.routingProfile.appRoutingMode != AppRoutingMode.ALL_APPS) {
+            addValue(VlessLinkKeys.AppMode, profile.routingProfile.appRoutingMode.queryValue())
+        }
+        profile.routingProfile.selectedAppPackages.forEach { packageName ->
+            addValue(VlessLinkKeys.AppPackage, packageName)
+        }
 
         profile.routingProfile.rules
             .filter(RoutingRule::enabled)
@@ -97,6 +104,11 @@ private fun DnsMode.queryValue(): String = when (this) {
     DnsMode.LOCAL -> "local"
     DnsMode.PROXY -> "proxy"
     DnsMode.SPLIT -> "split"
+}
+
+private fun AppRoutingMode.queryValue(): String = when (this) {
+    AppRoutingMode.ALL_APPS -> "all-apps"
+    AppRoutingMode.ONLY_SELECTED_APPS -> "only-selected"
 }
 
 private fun RoutingRule.queryKey(): String = when (action to matchType) {

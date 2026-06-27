@@ -2,6 +2,7 @@ package io.github.sj42tech.route42.parser
 
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
+import io.github.sj42tech.route42.model.AppRoutingMode
 import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.EndpointConfig
 import io.github.sj42tech.route42.model.ImportedShareLink
@@ -105,6 +106,14 @@ object VlessLinkParser {
         val dnsMode = queryParameters.lastValue(VlessLinkKeys.DnsKeys)
             ?.let(::parseDnsMode)
             ?: mode.defaultDnsMode()
+        val selectedAppPackages = queryParameters.valuesOf(VlessLinkKeys.AppPackageKeys)
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+            .distinct()
+            .sorted()
+        val appRoutingMode = queryParameters.lastValue(VlessLinkKeys.AppModeKeys)
+            ?.let(::parseAppRoutingMode)
+            ?: if (selectedAppPackages.isEmpty()) AppRoutingMode.ALL_APPS else AppRoutingMode.ONLY_SELECTED_APPS
 
         val rules = buildList {
             addRules(queryParameters.valuesOf(VlessLinkKeys.DirectDomainKeys), RoutingAction.DIRECT, MatchType.DOMAIN)
@@ -124,6 +133,8 @@ object VlessLinkParser {
             preset = preset,
             mode = mode,
             dnsMode = dnsMode,
+            appRoutingMode = appRoutingMode,
+            selectedAppPackages = selectedAppPackages,
             rules = rules,
         )
     }
@@ -160,6 +171,12 @@ object VlessLinkParser {
         "proxy" -> DnsMode.PROXY
         "split" -> DnsMode.SPLIT
         else -> throw LinkParseException("Unknown DNS mode: $value")
+    }
+
+    private fun parseAppRoutingMode(value: String): AppRoutingMode = when (value.lowercase()) {
+        "all", "all-apps" -> AppRoutingMode.ALL_APPS
+        "only-selected", "only-selected-apps", "only_selected_apps" -> AppRoutingMode.ONLY_SELECTED_APPS
+        else -> throw LinkParseException("Unknown app routing mode: $value")
     }
 
     private fun parseRoutingPreset(value: String): RoutingPreset = when (value.lowercase()) {

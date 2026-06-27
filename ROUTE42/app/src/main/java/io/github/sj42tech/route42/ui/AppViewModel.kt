@@ -107,6 +107,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun applySelectedAppPackages(profileId: String, selectedAppPackages: List<String>) {
+        viewModelScope.launch {
+            repository.setSelectedAppPackages(profileId, selectedAppPackages)
+            repository.setAppRoutingMode(profileId, AppRoutingMode.ONLY_SELECTED_APPS)
+        }
+    }
+
     fun setAppPackageSelected(profileId: String, packageName: String, selected: Boolean) {
         viewModelScope.launch {
             repository.setAppPackageSelected(profileId, packageName, selected)

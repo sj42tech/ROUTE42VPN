@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.sj42tech.route42.model.AppRoutingMode
+import io.github.sj42tech.route42.model.RecommendedVpnApps
 import io.github.sj42tech.route42.model.RoutingProfile
 import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.ui.components.OptionSelector
@@ -46,6 +47,7 @@ internal fun AppRoutingScreen(
     routingUsageCount: Int,
     onBack: () -> Unit,
     onAppRoutingModeSelected: (AppRoutingMode) -> Unit,
+    onApplySelectedAppPackages: (List<String>) -> Unit,
     onAppPackageSelected: (String, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
@@ -56,6 +58,9 @@ internal fun AppRoutingScreen(
     }
     var filter by rememberSaveable { mutableStateOf("") }
     val selectedPackages = routingProfile.selectedAppPackages.toSet()
+    val recommendedAppPackages = RecommendedVpnApps.installedPackagesFrom(
+        installedApps.map(InstalledAppUiModel::packageName),
+    )
     val visibleApps = installedApps.filter { app ->
         filter.isBlank() ||
             app.label.contains(filter, ignoreCase = true) ||
@@ -89,6 +94,22 @@ internal fun AppRoutingScreen(
                             selected = routingProfile.appRoutingMode,
                             label = AppRoutingMode::label,
                             onSelected = onAppRoutingModeSelected,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        androidx.compose.material3.Button(
+                            enabled = recommendedAppPackages.isNotEmpty(),
+                            onClick = { onApplySelectedAppPackages(recommendedAppPackages) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .semantics { contentDescription = "Use recommended VPN app list" },
+                        ) {
+                            Text("Use Recommended VPN Apps")
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = recommendedAppsDescription(recommendedAppPackages.size),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
@@ -229,6 +250,13 @@ private fun appRoutingModeDescription(routingProfile: RoutingProfile): String =
             "All apps can use the VPN. Domain and CIDR rules still decide direct, proxy, and blocked destinations."
         AppRoutingMode.ONLY_SELECTED_APPS ->
             "Only selected apps use VPN. This is the safest mode for leaving banks, marketplaces, and government apps outside Route42."
+    }
+
+private fun recommendedAppsDescription(installedRecommendedCount: Int): String =
+    if (installedRecommendedCount == 0) {
+        "No recommended VPN apps were found on this device yet. You can still select apps manually below."
+    } else {
+        "Selects $installedRecommendedCount installed browser, messaging, video, and social apps for VPN. Banks, marketplaces, delivery, and government apps stay outside VPN unless you manually add them."
     }
 
 private data class InstalledAppUiModel(

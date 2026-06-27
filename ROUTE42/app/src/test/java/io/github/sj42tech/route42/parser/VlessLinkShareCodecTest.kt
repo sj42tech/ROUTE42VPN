@@ -1,6 +1,7 @@
 package io.github.sj42tech.route42.parser
 
 import io.github.sj42tech.route42.TestFixtures
+import io.github.sj42tech.route42.model.AppRoutingMode
 import io.github.sj42tech.route42.model.ConnectionProfile
 import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
 import io.github.sj42tech.route42.model.ImportedShareLink
@@ -61,6 +62,36 @@ class VlessLinkShareCodecTest {
         assertEquals(
             listOf("enabled"),
             reparsedProfile.profile.importedShareLink?.preservedCustomParameters?.get("x-route42-future-flag"),
+        )
+    }
+
+    @Test
+    fun `exports selected app routing packages`() {
+        val profile = ConnectionProfile(
+            name = "share-apps",
+            endpoint = TestFixtures.sampleEndpoint(),
+        )
+        val resolvedProfile = ConnectionProfileWithRouting(
+            profile = profile,
+            routingProfile = TestFixtures.sampleRoutingProfile(
+                appRoutingMode = AppRoutingMode.ONLY_SELECTED_APPS,
+                selectedAppPackages = listOf(
+                    "org.telegram.messenger",
+                    "com.google.android.youtube",
+                ),
+            ).copy(id = profile.routingProfileId),
+        )
+
+        val exportedLink = VlessLinkShareCodec.export(resolvedProfile)
+        val reparsedProfile = VlessLinkParser.parse(exportedLink)
+
+        assertTrue(exportedLink.contains("x-route42-app-mode=only-selected"))
+        assertTrue(exportedLink.contains("x-route42-app-package=org.telegram.messenger"))
+        assertTrue(exportedLink.contains("x-route42-app-package=com.google.android.youtube"))
+        assertEquals(AppRoutingMode.ONLY_SELECTED_APPS, reparsedProfile.routingProfile.appRoutingMode)
+        assertEquals(
+            listOf("com.google.android.youtube", "org.telegram.messenger"),
+            reparsedProfile.routingProfile.selectedAppPackages,
         )
     }
 }

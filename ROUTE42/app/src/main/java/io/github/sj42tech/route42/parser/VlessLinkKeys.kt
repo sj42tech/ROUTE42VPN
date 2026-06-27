@@ -16,6 +16,8 @@ internal object VlessLinkKeys {
     const val Mode = "${PublicPrefix}mode"
     const val Dns = "${PublicPrefix}dns"
     const val Preset = "${PublicPrefix}preset"
+    const val AppMode = "${PublicPrefix}app-mode"
+    const val AppPackage = "${PublicPrefix}app-package"
     const val DirectDomain = "${PublicPrefix}direct-domain"
     const val DirectSuffix = "${PublicPrefix}direct-suffix"
     const val DirectCidr = "${PublicPrefix}direct-cidr"
@@ -31,6 +33,8 @@ internal object VlessLinkKeys {
     val ModeKeys = listOf(Mode)
     val DnsKeys = listOf(Dns)
     val PresetKeys = listOf(Preset)
+    val AppModeKeys = listOf(AppMode)
+    val AppPackageKeys = listOf(AppPackage)
     val DirectDomainKeys = listOf(DirectDomain)
     val DirectSuffixKeys = listOf(DirectSuffix)
     val DirectCidrKeys = listOf(DirectCidr)
@@ -59,6 +63,8 @@ internal object VlessLinkKeys {
         Mode,
         Dns,
         Preset,
+        AppMode,
+        AppPackage,
         DirectDomain,
         DirectSuffix,
         DirectCidr,

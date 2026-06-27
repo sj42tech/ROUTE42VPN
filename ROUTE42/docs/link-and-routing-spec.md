@@ -11,6 +11,7 @@ The import link is only the transport envelope. After parsing, the app stores a 
 - endpoint settings in `ConnectionProfile`;
 - a routing profile reference from the connection;
 - routing mode and DNS mode in `RoutingProfile`;
+- app-routing mode and selected Android package names in `RoutingProfile`;
 - editable routing rules with rule provenance;
 - preserved unknown query parameters as saved metadata.
 
@@ -96,6 +97,23 @@ Custom keys use the `x-route42-` prefix.
 - `x-route42-dns=proxy`
 - `x-route42-dns=split`
 
+### App Routing
+
+- `x-route42-app-mode=all-apps`
+- `x-route42-app-mode=only-selected`
+- `x-route42-app-package=org.telegram.messenger`
+- `x-route42-app-package=com.google.android.youtube`
+
+`x-route42-app-package` is repeatable. When at least one app package is present
+and `x-route42-app-mode` is omitted, Route42 treats the link as
+`only-selected`.
+
+Use app package values carefully:
+
+- package names are device/user-specific operational data;
+- public docs must use examples only;
+- live phone allowlists belong in ignored local secrets, not in the app repo.
+
 ### Direct Rules
 
 - `x-route42-direct-domain=portal.example`
@@ -141,7 +159,7 @@ That preset adds:
 ## Example With Routing Parameters
 
 ```text
-vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=cdn.example&fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&type=tcp&x-route42-mode=rule&x-route42-dns=split&x-route42-direct-domain=portal.example&x-route42-direct-domain=intranet.example&x-route42-direct-suffix=internal&x-route42-direct-cidr=192.168.0.0%2F16&x-route42-proxy-domain=tunnel.example&x-route42-block-suffix=tracking.example#edge-profile-rules
+vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=cdn.example&fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&type=tcp&x-route42-mode=rule&x-route42-dns=split&x-route42-app-mode=only-selected&x-route42-app-package=org.telegram.messenger&x-route42-app-package=com.google.android.youtube&x-route42-direct-domain=portal.example&x-route42-direct-domain=intranet.example&x-route42-direct-suffix=internal&x-route42-direct-cidr=192.168.0.0%2F16&x-route42-proxy-domain=tunnel.example&x-route42-block-suffix=tracking.example#edge-profile-rules
 ```
 
 ## Saved Domain Model
@@ -176,6 +194,8 @@ RoutingProfile
 - preset
 - mode
 - dnsMode
+- appRoutingMode
+- selectedAppPackages
 - rules: List<RoutingRule>
 
 RoutingRule
@@ -195,13 +215,14 @@ ImportedShareLink
 
 1. Standard VLESS fields map to `EndpointConfig`.
 2. If `security=reality`, `sni`, `fp`, `pbk`, and `sid` are required.
-3. `x-route42-*` routing keys map to `RoutingRule` entries inside `RoutingProfile`.
+3. `x-route42-*` routing keys map to `RoutingRule` entries and routing profile fields.
 4. Rules imported from `x-route42-*` are saved with `source=IMPORTED`.
 5. Rules added later in the UI are saved with `source=USER`.
 6. Built-in presets are assigned in the app and are not encoded in the raw import link.
 7. Unknown non-routing keys are preserved as saved metadata.
 8. Missing routing parameters default to `RoutingMode.PROXY`.
-9. After saving, the UI edits the normalized connection/routing models, not the raw URL.
+9. Missing app-routing parameters default to `AppRoutingMode.ALL_APPS`.
+10. After saving, the UI edits the normalized connection/routing models, not the raw URL.
 
 ## Runtime Layering
 

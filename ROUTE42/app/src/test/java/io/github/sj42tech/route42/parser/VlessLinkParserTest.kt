@@ -1,6 +1,7 @@
 package io.github.sj42tech.route42.parser
 
 import io.github.sj42tech.route42.TestFixtures
+import io.github.sj42tech.route42.model.AppRoutingMode
 import io.github.sj42tech.route42.model.DnsMode
 import io.github.sj42tech.route42.model.MatchType
 import io.github.sj42tech.route42.model.RoutingAction
@@ -70,6 +71,37 @@ class VlessLinkParserTest {
         assertEquals(RoutingPreset.RU_LOCAL_V1, profile.routingProfile.preset)
         assertEquals(RoutingMode.RULE, profile.routingProfile.mode)
         assertEquals(DnsMode.SPLIT, profile.routingProfile.dnsMode)
+    }
+
+    @Test
+    fun `parses selected app routing from share link`() {
+        val profile = VlessLinkParser.parse(
+            "vless://${TestFixtures.Uuid}@${TestFixtures.Server}:${TestFixtures.Port}?" +
+                "encryption=none&security=reality&sni=${TestFixtures.ServerName}&fp=chrome&" +
+                "pbk=${TestFixtures.PublicKey}&sid=${TestFixtures.ShortId}&type=tcp&" +
+                "x-route42-app-mode=only-selected&" +
+                "x-route42-app-package=org.telegram.messenger&" +
+                "x-route42-app-package=com.google.android.youtube#apps",
+        )
+
+        assertEquals(AppRoutingMode.ONLY_SELECTED_APPS, profile.routingProfile.appRoutingMode)
+        assertEquals(
+            listOf("com.google.android.youtube", "org.telegram.messenger"),
+            profile.routingProfile.selectedAppPackages,
+        )
+    }
+
+    @Test
+    fun `treats app packages as only selected app routing when mode is omitted`() {
+        val profile = VlessLinkParser.parse(
+            "vless://${TestFixtures.Uuid}@${TestFixtures.Server}:${TestFixtures.Port}?" +
+                "encryption=none&security=reality&sni=${TestFixtures.ServerName}&fp=chrome&" +
+                "pbk=${TestFixtures.PublicKey}&sid=${TestFixtures.ShortId}&type=tcp&" +
+                "x-route42-app-package=org.telegram.messenger#apps",
+        )
+
+        assertEquals(AppRoutingMode.ONLY_SELECTED_APPS, profile.routingProfile.appRoutingMode)
+        assertEquals(listOf("org.telegram.messenger"), profile.routingProfile.selectedAppPackages)
     }
 
     @Test

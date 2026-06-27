@@ -168,6 +168,9 @@ fun Route42App(viewModel: AppViewModel) {
                             routingUsageCount = migratedSnapshot.profilesUsingRoutingProfile(routingProfile.id).size,
                             onBack = { navController.popBackStack() },
                             onAppRoutingModeSelected = { viewModel.setAppRoutingMode(profile.id, it) },
+                            onApplySelectedAppPackages = { selectedAppPackages ->
+                                viewModel.applySelectedAppPackages(profile.id, selectedAppPackages)
+                            },
                             onAppPackageSelected = { packageName, selected ->
                                 viewModel.setAppPackageSelected(profile.id, packageName, selected)
                             },
