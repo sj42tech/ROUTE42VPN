@@ -1,44 +1,33 @@
-# Workspace Index
+# Repository Layout
 
-This workspace is now split into two project layers.
+This repository tracks the Route42 Android app and GitHub release metadata only.
 
-## Route42
+## Tracked Areas
 
-Public Android app project:
+- `.github/` contains GitHub Actions workflow metadata.
+- `ROUTE42/` contains the Android app, docs, source code, tests, assets, Gradle wrapper, and app-local tools.
+- `.gitignore` protects local build outputs, private material, and neighboring local workspaces.
 
-- [../README.md](../README.md)
-- [ROUTE42 docs](.)
+## App Build Entry Point
 
-Build from the repository root:
+Run app commands from `ROUTE42/`:
 
 ```bash
 cd ROUTE42
 ./gradlew testDebugUnitTest assembleDebug assembleRelease
 ```
 
-## ignored-local-storage
+## Local-Only Areas
 
-Private lab and infrastructure layer for:
+The following paths are intentionally ignored and must not be committed:
 
-- VPS research
-- Xray and Reality configs
-- routing experiments
-- local network diagnostics
-- provider comparisons
-
-Entry points:
-
-- [../../ignored-local-storage/README.md](../../ignored-local-storage/README.md)
-- [../../ignored-local-storage/docs](../../ignored-local-storage/docs)
-- [../../ignored-local-storage/ops/README.md](../../ignored-local-storage/ops/README.md)
-
-`ROUTE42/secrets/` is the local ignored area for app signing material and release helpers.
-
-`ignored-local-storage/secrets/` is the local ignored area for VPS, Xray, network, and provider credentials.
-
-Live Route42 VPS tuples, reusable smoke-test links, and generated local share-code images should stay under ignored `../ignored-local-storage/secrets/ROUTE42/`.
+- `ROUTE42/secrets/` for local signing helper material.
+- `ROUTE42/build/` and `ROUTE42/app/build/` for generated build outputs.
+- `ROUTE42/.gradle/` for local Gradle state.
+- Neighboring lab, infrastructure, experiment, and private-data directories at the repository root.
 
 ## GitHub Release Flow
 
-- The signed Android release workflow lives at [../../.github/workflows/release-apk.yml](../../.github/workflows/release-apk.yml).
+- The signed Android release workflow lives at `.github/workflows/release-apk.yml`.
 - The workflow builds the app from `ROUTE42/`.
+- GitHub repository secrets provide release signing material; local keystores must not be committed.

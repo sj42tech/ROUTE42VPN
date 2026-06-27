@@ -56,12 +56,13 @@ This applies to:
 - local and generated files;
 - anonymization rules and the ban on personal data in the repo.
 
-## Live Tunnel Safety
+## Repository Boundary
 
-- Do not stop, restart, unload, or disable `local.xray` while a working desktop tunnel is active unless the user gives an explicit instruction to do that.
-- Do not disable macOS system proxy settings while the live desktop tunnel is considered working unless the user explicitly requests that action.
-- Provider and path diagnostics should be run as direct no-proxy checks that bypass the current tunnel while leaving the active `xray` session untouched.
-- For direct provider checks from the laptop without touching the live tunnel, use [diagnose-direct-provider-path.sh](../ignored-local-storage/ops/diagnose-direct-provider-path.sh).
+This repository tracks only the Route42 Android app and release metadata.
+
+- App code, docs, assets, Gradle files, and tooling live under `ROUTE42/`.
+- GitHub workflow metadata lives under `.github/`.
+- Live VPS inventories, provider operations, private share links, generated local QR codes, signing material, logs, and machine-specific files must stay in ignored local storage and must not be committed.
 
 ## Project At A Glance
 
@@ -90,21 +91,9 @@ This applies to:
 - [docs/self-hosted-vpn-android-guide.md](docs/self-hosted-vpn-android-guide.md)
 - [docs/import-link-routing-guide.md](docs/import-link-routing-guide.md)
 - [docs/link-and-routing-spec.md](docs/link-and-routing-spec.md)
-- [docs/route42-team-vps-and-routing-brief-2026-04-04.md](docs/route42-team-vps-and-routing-brief-2026-04-04.md)
 - [docs/mvp-config.md](docs/mvp-config.md)
 - [docs/release-notes-0.1.6.md](docs/release-notes-0.1.6.md)
-- [docs/release-notes-0.1.4.md](docs/release-notes-0.1.4.md)
-- [docs/release-plan-0.1.4.md](docs/release-plan-0.1.4.md)
 - [DONATE.md](DONATE.md)
-
-## Workspace Docs
-
-- [docs/workspace-layout.md](docs/workspace-layout.md)
-- [../ignored-local-storage/docs/vps-audit-2026-03-22.md](../ignored-local-storage/docs/vps-audit-2026-03-22.md)
-- [../ignored-local-storage/docs/exoscale-vps-onboarding.md](../ignored-local-storage/docs/exoscale-vps-onboarding.md)
-- [../ignored-local-storage/docs/uhost-vps-onboarding.md](../ignored-local-storage/docs/uhost-vps-onboarding.md)
-- [../ignored-local-storage/docs/vultr-zero-cost-exit.md](../ignored-local-storage/docs/vultr-zero-cost-exit.md)
-- [../ignored-local-storage/ops/README.md](../ignored-local-storage/ops/README.md)
 
 ## GitHub Releases
 

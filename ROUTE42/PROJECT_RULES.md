@@ -18,6 +18,9 @@ These rules are mandatory for every project file: source code, tests, Markdown d
 
 ## 2. File Structure
 
+- The git repository tracks only `.github/`, `.gitignore`, and `ROUTE42/`.
+- The app project itself lives under `ROUTE42/`.
+- Neighboring lab, infrastructure, experiment, provider, or private-data directories may exist locally only when ignored by root `.gitignore`.
 - One file should handle one main job.
 - Large UI screens should be split into separate screen, component, and navigation files.
 - Large services should be split into a main lifecycle file plus helper files for notifications, network logic, intent wrappers, and utilities.

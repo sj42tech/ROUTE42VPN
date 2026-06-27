@@ -1,6 +1,6 @@
 # Route42 Local Share Code Workflow
 
-This note describes the Route42 camera-import flow without storing live VPS links in the public app layer.
+This note describes the Route42 camera-import flow without storing live links in tracked app files.
 
 ## In-App Flow
 
@@ -11,14 +11,14 @@ To import from another device:
 - tap `Scan Code`;
 - scan a `Data Matrix` or `QR` code that contains a `vless://` link.
 
-## Public Repository Rule
+## Repository Rule
 
-Live share links and generated share-code images must not be committed to `ROUTE42`.
+Live share links and generated share-code images must not be committed.
 
-Keep them in ignored local lab storage instead, for example:
+Keep them in ignored local app storage instead, for example:
 
-- `../ignored-local-storage/secrets/ROUTE42/live-profile-links.tsv`
-- `../ignored-local-storage/secrets/ROUTE42/share-codes/`
+- `ROUTE42/secrets/share-links.tsv`
+- `ROUTE42/build/share-codes/`
 
 ## Local Manifest Format
 
@@ -42,7 +42,7 @@ Generated images should stay in ignored local storage rather than tracked app do
 
 ## Recommended Local-Only Workflow
 
-1. Maintain live share links in ignored `../ignored-local-storage/secrets/ROUTE42/live-profile-links.tsv`.
-2. Render local share codes into ignored `../ignored-local-storage/secrets/ROUTE42/share-codes/`.
+1. Maintain live share links in ignored local storage.
+2. Render local share codes into ignored `ROUTE42/build/share-codes/`.
 3. Use Route42 camera import on the target Android device.
-4. Keep any live notes or exported links in `ignored-local-storage/secrets/ROUTE42/`, not in tracked `ROUTE42` docs.
+4. Keep any live notes, exported links, and generated images out of tracked docs.

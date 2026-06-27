@@ -24,10 +24,14 @@
 /ROUTE42/*.apk
 /ROUTE42/branding/variant-*.png
 /ROUTE42/secrets/
-/ignored-local-storage/secrets/
-/ignored-local-storage/logs/
+
+# This repository tracks only the Route42 app plus GitHub metadata.
+# Local lab, infrastructure, experiments, generated roots, and private
+# credentials may exist beside the app, but must never enter git.
+/ignored-local-storage/
+/ignored-local-storage/
+/ignored-local-storage/
+/docs/
 /secrets/
-/ignored-local-storage/deploy/pi-noip/stack.env
-/ignored-local-storage/deploy/pi-lan-https/stack.env
-/ignored-local-storage/deploy/pi-lan-https/caddy-data/
-/ignored-local-storage/deploy/pi-lan-https/caddy-config/
+/access.log
+/error.log
