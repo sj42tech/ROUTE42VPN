@@ -28,9 +28,9 @@
 # This repository tracks only the Route42 app plus GitHub metadata.
 # Local lab, infrastructure, experiments, generated roots, and private
 # credentials may exist beside the app, but must never enter git.
-/ignored-local-storage/
-/ignored-local-storage/
-/ignored-local-storage/
+/SJLABORATORY/
+/EXHALATION/
+/PILOT/
 /docs/
 /secrets/
 /access.log
