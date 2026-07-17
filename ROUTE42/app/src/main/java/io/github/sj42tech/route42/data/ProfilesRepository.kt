@@ -33,19 +33,13 @@ class ProfilesRepository(private val context: Context) {
     val profiles = context.profilesDataStore.data
 
     suspend fun upsertProfile(profileWithRouting: ConnectionProfileWithRouting): String {
+        var mergedProfileId = profileWithRouting.profile.id
         context.profilesDataStore.updateData { snapshot ->
-            val migratedSnapshot = snapshot.migrated()
-            val normalizedProfile = profileWithRouting.profile.copy(legacyRouting = null)
-            val normalizedRoutingProfile = profileWithRouting.routingProfile.copy(id = normalizedProfile.routingProfileId)
-            val remainingProfiles = migratedSnapshot.profiles.filterNot { it.id == normalizedProfile.id }
-            val remainingRoutingProfiles = migratedSnapshot.routingProfiles.filterNot { it.id == normalizedRoutingProfile.id }
-
-            migratedSnapshot.copy(
-                profiles = (remainingProfiles + normalizedProfile).sortedByDescending(ConnectionProfile::createdAtEpochMillis),
-                routingProfiles = remainingRoutingProfiles + normalizedRoutingProfile,
-            )
+            snapshot.mergeImportedProfile(profileWithRouting).also { result ->
+                mergedProfileId = result.profileId
+            }.snapshot
         }
-        return profileWithRouting.profile.id
+        return mergedProfileId
     }
 
     suspend fun setRoutingMode(profileId: String, mode: RoutingMode) {

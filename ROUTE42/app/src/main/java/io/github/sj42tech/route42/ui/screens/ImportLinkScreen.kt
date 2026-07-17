@@ -26,7 +26,9 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import io.github.sj42tech.route42.config.SingBoxConfigGenerator
+import io.github.sj42tech.route42.data.findMatchingImportedProfile
 import io.github.sj42tech.route42.model.ConnectionProfileWithRouting
+import io.github.sj42tech.route42.model.ProfilesSnapshot
 import io.github.sj42tech.route42.model.label
 import io.github.sj42tech.route42.parser.VlessLinkParser
 import io.github.sj42tech.route42.ui.components.InfoChipRow
@@ -37,6 +39,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun ImportLinkScreen(
+    profilesSnapshot: ProfilesSnapshot,
     onBack: () -> Unit,
     onSave: suspend (ConnectionProfileWithRouting) -> Unit,
 ) {
@@ -48,6 +51,9 @@ internal fun ImportLinkScreen(
         }
     }
     val parsedProfile = parseResult?.getOrNull()
+    val matchingProfile = remember(parsedProfile, profilesSnapshot) {
+        parsedProfile?.let { profilesSnapshot.findMatchingImportedProfile(it.profile) }
+    }
     val parseError = parseResult?.exceptionOrNull()?.message
     val configError = remember(parsedProfile) {
         parsedProfile?.let { profile ->
@@ -134,6 +140,16 @@ internal fun ImportLinkScreen(
                 item {
                     ImportPreviewCard(profile = parsedProfile)
                 }
+                if (matchingProfile != null) {
+                    item {
+                        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "This connection already exists. Route42 will refresh its server and Reality settings while keeping the current routing profile and selected apps.",
+                                modifier = Modifier.padding(16.dp),
+                            )
+                        }
+                    }
+                }
                 if (configError == null) item {
                     Button(
                         onClick = {
@@ -145,7 +161,7 @@ internal fun ImportLinkScreen(
                             .fillMaxWidth()
                             .semantics { contentDescription = "Save imported profile" },
                     ) {
-                        Text("Save Profile")
+                        Text(if (matchingProfile == null) "Save Profile" else "Update Connection")
                     }
                 }
             }

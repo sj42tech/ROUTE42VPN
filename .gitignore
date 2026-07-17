@@ -5,6 +5,7 @@
 *.iml
 *.log
 *.hprof
+*.class
 *.jks
 *.keystore
 .gradle/

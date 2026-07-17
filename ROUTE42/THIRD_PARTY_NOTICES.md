@@ -10,19 +10,21 @@ Update this file whenever a vendored binary, upstream version, or third-party de
 - Local path: `app/libs/libbox.aar`
 - Upstream project: [SagerNet/sing-box](https://github.com/SagerNet/sing-box)
 - Upstream license: `GPL-3.0-or-later`
-- Recorded upstream version tag: `v1.13.3`
+- Recorded upstream version tag: `v1.13.12`
+- Recorded upstream commit: `1086ab2563320e0da0c23b3a491d8dfa0939dff4`
+- Vendored AAR SHA-256: `bbbd71babf37bddb21e31025a3a1cbc2d5b6feae17e7d593133502f2a4923cf7`
 
 The vendored Android library contains the following provenance markers in the shipped binary:
 
 - `github.com/sagernet/sing-box`
 - `github.com/sagernet/sing-box/build/arm64/libbox`
-- `v1.13.3`
+- `v1.13.12`
 
 These markers identify the vendored `libbox.aar` as a build derived from the upstream `SagerNet/sing-box` project.
 
 Upstream Android `libbox` builds are produced from the `sing-box` repository. Upstream build references include `go run ./cmd/internal/build_libbox -target android`.
 
-Route42 currently vendors the arm64 Android build produced from the official `v1.13.3` source tag.
+Route42 currently vendors the arm64 Android build produced from the official `v1.13.12` source tag. See [docs/libbox-vendor.md](docs/libbox-vendor.md) for the build and verification procedure.
 
 Route42 ships this binary as a third-party dependency. Route42 is an independent client project and is not an official sing-box client.
 

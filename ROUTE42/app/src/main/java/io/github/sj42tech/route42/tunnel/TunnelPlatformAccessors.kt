@@ -27,11 +27,11 @@ internal fun TunnelService.resolveConnectionOwner(
     if (uid == Process.INVALID_UID) {
         error("Connection owner not found")
     }
-    val packageName = packageManager.getPackagesForUid(uid)?.firstOrNull().orEmpty()
+    val packageNames = packageManager.getPackagesForUid(uid).orEmpty().toList()
     return ConnectionOwner().apply {
         userId = uid
-        userName = packageName
-        androidPackageName = packageName
+        userName = packageNames.firstOrNull().orEmpty()
+        setAndroidPackageNames(SimpleStringIterator(packageNames))
     }
 }
 

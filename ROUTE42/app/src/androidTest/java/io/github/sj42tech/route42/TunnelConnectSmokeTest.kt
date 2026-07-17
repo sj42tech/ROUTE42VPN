@@ -85,6 +85,7 @@ class TunnelConnectSmokeTest {
     @Test
     fun opensShareCodeScreenForImportedProfile() {
         importProfile(ExampleRealityLink)
+        composeRule.onNode(hasScrollAction()).performScrollToNode(hasText("Choose Routing Profile"))
         composeRule.onNodeWithText("Choose Routing Profile").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Create RU + Local Profile").assertIsDisplayed().performClick()
         composeRule.waitUntil(timeoutMillis = 10_000) {
@@ -99,6 +100,28 @@ class TunnelConnectSmokeTest {
         }
         composeRule.onNodeWithText("Scan this code in Route42 on another device to import the same connection.").assertIsDisplayed()
         composeRule.onNodeWithText("RU + Local").assertIsDisplayed()
+    }
+
+    @Test
+    fun refreshesExistingConnectionWithoutLosingRouting() {
+        importProfile(ExampleRealityLinkWithRouting)
+        composeRule.onNodeWithText("Back").performClick()
+
+        composeRule.onNodeWithText("Import").assertIsDisplayed().performClick()
+        composeRule.onNode(hasSetTextAction()).performTextInput(UpdatedExampleRealityLink)
+        composeRule.onNode(hasScrollAction()).performScrollToNode(hasText("Update Connection"))
+        composeRule.onNodeWithText("Update Connection").assertIsDisplayed().performClick()
+
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            runCatching { composeRule.onNodeWithText("Profile name: example-updated").assertIsDisplayed() }.isSuccess
+        }
+        composeRule.onNode(hasScrollAction()).performScrollToNode(hasText("Preset: RU + Local"))
+        composeRule.onNodeWithText("Preset: RU + Local").assertIsDisplayed()
+        composeRule.onNode(hasScrollAction()).performScrollToNode(hasText("2 selected apps."))
+        composeRule.onAllNodesWithText("2 selected apps.").assertCountEquals(1)
+
+        composeRule.onNodeWithText("Back").performClick()
+        composeRule.onAllNodesWithText("example-updated").assertCountEquals(1)
     }
 
     private fun importProfile(link: String) {
@@ -199,5 +222,19 @@ class TunnelConnectSmokeTest {
             "vless://11111111-2222-4333-8444-555555555555@203.0.113.10:443?" +
                 "encryption=none&security=reality&" +
                 "fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&type=tcp#example-broken"
+
+        const val ExampleRealityLinkWithRouting =
+            "vless://22222222-3333-4444-8555-666666666666@203.0.113.11:443?" +
+                "encryption=none&security=reality&sni=old-target.example&" +
+                "fp=chrome&pbk=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCDE&sid=a1b2&type=tcp&" +
+                "x-route42-preset=ru-local-v1&x-route42-mode=rule&x-route42-dns=split&" +
+                "x-route42-app-mode=only-selected&" +
+                "x-route42-app-package=org.telegram.messenger&" +
+                "x-route42-app-package=com.google.android.youtube#example-original"
+
+        const val UpdatedExampleRealityLink =
+            "vless://22222222-3333-4444-8555-666666666666@203.0.113.11:443?" +
+                "encryption=none&security=reality&sni=new-target.example&" +
+                "fp=firefox&pbk=ZyXwVuTsRqPoNmLkJiHgFeDcBa9876543210ABCDE&sid=c3d4&type=tcp#example-updated"
     }
 }

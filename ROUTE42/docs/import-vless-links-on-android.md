@@ -22,6 +22,14 @@ Current product behavior:
 - imported routing rules are stored in a reusable routing profile and marked as imported metadata in the UI;
 - you can later switch that connection to a shared preset such as `Rule (RU + Local)`.
 
+## Refreshing An Existing Connection
+
+Reality targets and other endpoint fields can change while the VPS address and account remain the same. When an imported link matches an existing protocol, server, port, and UUID, Route42 shows `Update Connection` instead of creating a duplicate profile.
+
+The refresh replaces the profile name and connection fields from the new link. It preserves the existing profile identity, shared routing assignment, custom rules, preset, DNS mode, and selected-app scope. This allows a trusted replacement code to rotate SNI, Reality keys, fingerprint, flow, or transport settings without losing routing configured on the phone.
+
+Always review the import preview and only refresh a connection from a trusted code source.
+
 For the full parameter reference, see:
 
 - [Route42 Link Import And Routing Parameter Guide](import-link-routing-guide.md)

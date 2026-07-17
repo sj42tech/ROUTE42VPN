@@ -73,6 +73,7 @@ fun Route42App(viewModel: AppViewModel) {
                 }
                 composable(AppRoute.Import) {
                     ImportLinkScreen(
+                        profilesSnapshot = migratedSnapshot,
                         onBack = { navController.popBackStack() },
                         onSave = { importedProfile ->
                             val profileId = viewModel.upsertProfile(importedProfile)

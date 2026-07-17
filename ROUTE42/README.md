@@ -92,6 +92,7 @@ This repository tracks only the Route42 Android app and release metadata.
 - [docs/import-link-routing-guide.md](docs/import-link-routing-guide.md)
 - [docs/link-and-routing-spec.md](docs/link-and-routing-spec.md)
 - [docs/mvp-config.md](docs/mvp-config.md)
+- [docs/release-notes-0.1.9.md](docs/release-notes-0.1.9.md)
 - [docs/release-notes-0.1.8.md](docs/release-notes-0.1.8.md)
 - [docs/release-notes-0.1.6.md](docs/release-notes-0.1.6.md)
 - [DONATE.md](DONATE.md)
